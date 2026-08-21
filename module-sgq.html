@@ -527,10 +527,11 @@ function esc(s){
 function computeKPIs(rows){
   const total = rows.length;
   const ativos = rows.filter(r=>r.situacao==="Ativo").length;
-  const vencidos = rows.filter(r=>r.status==="Vencido").length;
-  const proximos = rows.filter(r=>r.status==="Vence em 30 dias" || r.status==="Vence em 90 dias").length;
+  // Vencidos / próximos: só documentos ativos (alinha com a Lista Mestra)
+  const vencidos = rows.filter(r=>r.situacao==="Ativo" && r.status==="Vencido").length;
+  const proximos = rows.filter(r=>r.situacao==="Ativo" && (r.status==="Vence em 30 dias" || r.status==="Vence em 90 dias")).length;
   const obsoletos = rows.filter(r=>r.situacao==="Obsoleto").length;
-  const emDia = rows.filter(r=>r.status==="Em dia").length;
+  const emDia = rows.filter(r=>r.situacao==="Ativo" && r.status==="Em dia").length;
   const conformidade = ativos ? (emDia/ativos*100) : 0;
   return {total, ativos, vencidos, proximos, obsoletos, conformidade};
 }

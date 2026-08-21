@@ -447,10 +447,23 @@ function parseSGQ(wb){
     if(!r || r[iCod] == null || r[iCod] === '') continue;
     const prox = fmtDateISO(r[iProx]);
     const ult = fmtDateISO(r[iUlt]);
-    const situacao = iSit >= 0 && r[iSit] != null ? String(r[iSit]) : 'Ativo';
-    let dias = iDias >= 0 && r[iDias] != null && r[iDias] !== '' ? Number(r[iDias]) : daysUntil(prox);
-    if(Number.isNaN(dias)) dias = daysUntil(prox);
-    let status = iStat >= 0 && r[iStat] ? String(r[iStat]) : statusFromDays(dias, situacao);
+    const situacao = iSit >= 0 && r[iSit] != null && String(r[iSit]).trim() !== ''
+      ? String(r[iSit]).trim() : 'Ativo';
+    // Prioridade: valores da planilha (Status e Dias Restantes). Só recalcula se faltar.
+    let dias = null;
+    if(iDias >= 0 && r[iDias] != null && r[iDias] !== ''){
+      const n = Number(r[iDias]);
+      if(!Number.isNaN(n)) dias = n;
+    }
+    if(dias === null) dias = daysUntil(prox);
+    let status = null;
+    if(iStat >= 0 && r[iStat] != null && String(r[iStat]).trim() !== ''){
+      status = String(r[iStat]).trim();
+    }
+    // Situação Obsoleto/Cancelado manda no status
+    if(/obsoleto/i.test(situacao)) status = 'Obsoleto';
+    else if(/cancelado/i.test(situacao)) status = 'Cancelado';
+    else if(!status) status = statusFromDays(dias, situacao);
     docs.push({
       codigo: String(r[iCod]),
       tipo: iTipo >= 0 && r[iTipo] != null ? String(r[iTipo]) : '',
