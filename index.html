@@ -162,30 +162,39 @@ function goHome(){
   document.getElementById('chip').textContent = 'Guia';
 }
 
-function hideNestedChrome(iframe){
+function hideNestedChrome(iframe, mod){
   try{
     const doc = iframe.contentDocument || iframe.contentWindow.document;
     if(!doc) return;
-    // Esconde apenas marca/logo/chip da topbar interna; mantém as sub-abas (Dashboard, Lista Mestra, etc.)
     const style = doc.createElement('style');
-    style.textContent = `
-      .topbar .brand,
-      .topbar .brand-mark,
-      .topbar .brand-text,
-      .topbar .brand-logo,
-      .topbar .brand-logo-top,
-      .topbar-right,
-      .toolbar { display: none !important; }
-      .topbar {
-        height: 52px !important;
-        padding: 0 16px !important;
-        justify-content: flex-start !important;
-      }
-      .topbar .tabs { margin-left: 0 !important; }
-    `;
+    if(mod === 'relatorio'){
+      // Mantém toolbar com botão Imprimir; esconde só o link voltar (já temos ← Guia fora)
+      style.textContent = `
+        .toolbar a.btn-b,
+        .toolbar a[href="index.html"] { display: none !important; }
+        .toolbar { display: flex !important; align-items: center; gap: 12px; }
+        .toolbar b { flex: 1; }
+      `;
+    } else {
+      style.textContent = `
+        .topbar .brand,
+        .topbar .brand-mark,
+        .topbar .brand-text,
+        .topbar .brand-logo,
+        .topbar .brand-logo-top,
+        .topbar-right { display: none !important; }
+        .topbar {
+          height: 52px !important;
+          padding: 0 16px !important;
+          justify-content: flex-start !important;
+        }
+        .topbar .tabs { margin-left: 0 !important; }
+      `;
+    }
     doc.head.appendChild(style);
   }catch(e){}
 }
+
 function openMod(mod){
   current = mod;
   document.getElementById('guia').classList.add('hidden');
@@ -196,9 +205,9 @@ function openMod(mod){
   document.getElementById('topbar').classList.add('show');
   document.getElementById('chip').textContent = LABELS[mod] || mod;
   if(fr.contentDocument && fr.contentDocument.readyState === 'complete'){
-    hideNestedChrome(fr);
+    hideNestedChrome(fr, mod);
   } else {
-    fr.addEventListener('load', function onL(){ hideNestedChrome(fr); fr.removeEventListener('load', onL); });
+    fr.addEventListener('load', function onL(){ hideNestedChrome(fr, mod); fr.removeEventListener('load', onL); });
   }
 }
 </script>
