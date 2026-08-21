@@ -263,154 +263,202 @@ function openMod(mod){
 }
 </script>
 
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const LS_KEY = 'carmak_qualidade_v1';
 
+function setStatus(msg, cls){
+  const el = document.getElementById('import-status');
+  if(!el) return;
+  el.textContent = msg;
+  el.className = 'import-status' + (cls ? (' ' + cls) : '');
+}
+
 function fmtDateISO(v){
   if(v==null || v==='') return null;
-  if(typeof v === 'number' && window.XLSX){
-    const d = XLSX.SSF.parse_date_code(v);
-    if(d) return `${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`;
+  if(typeof v === 'number' && typeof XLSX !== 'undefined'){
+    try{
+      const d = XLSX.SSF.parse_date_code(v);
+      if(d) return d.y + '-' + String(d.m).padStart(2,'0') + '-' + String(d.d).padStart(2,'0');
+    }catch(e){}
   }
-  if(v instanceof Date && !isNaN(v)) return v.toISOString().slice(0,10);
+  if(v instanceof Date && !isNaN(v)) {
+    return v.getFullYear() + '-' + String(v.getMonth()+1).padStart(2,'0') + '-' + String(v.getDate()).padStart(2,'0');
+  }
   const s = String(v).trim();
-  const m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
-  if(m) return `${m[1]}-${m[2]}-${m[3]}`;
-  const m2 = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
-  if(m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
-  return s;
+  let m = s.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return m[1]+'-'+m[2]+'-'+m[3];
+  m = s.match(/(\d{2})\/(\d{2})\/(\d{4})/);
+  if(m) return m[3]+'-'+m[2]+'-'+m[1];
+  return null;
 }
 function daysUntil(iso){
   if(!iso) return null;
-  const d = new Date(iso+'T00:00:00');
+  const d = new Date(iso + 'T12:00:00');
   if(isNaN(d)) return null;
-  const now = new Date(); now.setHours(0,0,0,0);
-  return Math.round((d-now)/86400000);
+  const now = new Date(); now.setHours(12,0,0,0);
+  return Math.round((d - now) / 86400000);
 }
 function statusFromDays(dias, situacao){
-  const sit = (situacao||'').toString();
-  if(sit === 'Obsoleto') return 'Obsoleto';
-  if(sit === 'Cancelado') return 'Cancelado';
-  if(dias===null || dias===undefined) return 'Em dia';
+  const sit = String(situacao || '');
+  if(/obsoleto/i.test(sit)) return 'Obsoleto';
+  if(/cancelado/i.test(sit)) return 'Cancelado';
+  if(dias == null) return 'Em dia';
   if(dias < 0) return 'Vencido';
   if(dias <= 30) return 'Vence em 30 dias';
   if(dias <= 90) return 'Vence em 90 dias';
   return 'Em dia';
 }
-function sheetToRows(wb, name){
+function norm(s){
+  return String(s == null ? '' : s)
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+function sheetRows(wb, name){
   const ws = wb.Sheets[name];
   if(!ws) return null;
   return XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
 }
-function findHeaderRow(rows, mustHave){
-  for(let i=0;i<Math.min(rows.length,15);i++){
-    const r = (rows[i]||[]).map(c => (c==null?'':String(c).trim().toLowerCase()));
-    if(mustHave.every(h => r.some(c => c.includes(h.toLowerCase())))) return i;
+function findSheet(wb, predicates){
+  // predicates: array of functions (name) => bool, tried in order; or string includes
+  for(const pred of predicates){
+    if(typeof pred === 'string'){
+      const hit = wb.SheetNames.find(n => norm(n).includes(norm(pred)));
+      if(hit) return hit;
+    } else {
+      const hit = wb.SheetNames.find(pred);
+      if(hit) return hit;
+    }
+  }
+  return null;
+}
+function findHeaderRow(rows, keys){
+  // keys already normalized
+  for(let i = 0; i < Math.min(rows.length, 20); i++){
+    const cells = (rows[i] || []).map(c => norm(c));
+    if(keys.every(k => cells.some(c => c.includes(k)))) return i;
+  }
+  return -1;
+}
+function colIndex(headerCells, labels){
+  const H = headerCells.map(c => norm(c));
+  for(const lab of labels){
+    const nlab = norm(lab);
+    let i = H.findIndex(h => h === nlab);
+    if(i >= 0) return i;
+    i = H.findIndex(h => h.includes(nlab));
+    if(i >= 0) return i;
   }
   return -1;
 }
 function normStatusMod(s){
-  if(s==null || s==='') return 'vazio';
-  const t = String(s).toLowerCase();
+  if(s == null || s === '') return 'vazio';
+  const t = norm(s);
   if(t.includes('reprov')) return 'reprovado';
   if(t.includes('conclu')) return 'concluido';
   if(t.includes('apto')) return 'apto';
   if(t.includes('inscrit')) return 'inscrito';
   return 'vazio';
 }
+
 function parseTreinamentos(wb){
-  const name = wb.SheetNames.find(n => n.toLowerCase().includes('treinamentos') && !n.toLowerCase().includes('cronograma'))
-    || '01 Gestão de Treinamentos';
-  const rows = sheetToRows(wb, name);
+  const name = findSheet(wb, [
+    n => norm(n).includes('gestao de treinamentos'),
+    n => norm(n).includes('treinamentos') && !norm(n).includes('cronograma'),
+    '01 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
   if(!rows) return null;
-  const hi = findHeaderRow(rows, ['nome','região']);
+  const hi = findHeaderRow(rows, ['nome', 'regiao']);
   if(hi < 0) return null;
-  const header = rows[hi].map(c => c==null?'':String(c).trim());
+  const header = (rows[hi] || []).map(c => c == null ? '' : String(c).trim());
   const modules = header.slice(2).filter(Boolean);
   const short = {};
-  modules.forEach((m,i)=>{
-    short[m] = m.replace('STEP ','S').replace(' TO/BT','')
-      .replace(' Módulo ','M').replace(' TO ','T').replace(' BT','BT').slice(0,8);
+  modules.forEach(m => {
+    short[m] = m.replace(/STEP /i,'S').replace(/ TO\/BT/i,'').replace(/ M[oó]dulo /i,'M')
+      .replace(/ TO /i,'T').replace(/ BT/i,'BT').slice(0, 10);
   });
   const people = [];
-  for(let i=hi+1;i<rows.length;i++){
+  for(let i = hi + 1; i < rows.length; i++){
     const r = rows[i];
-    if(!r || !r[0]) continue;
+    if(!r || r[0] == null || r[0] === '') continue;
     const nome = String(r[0]).trim();
-    const regiao = r[1]==null?'':String(r[1]).trim();
-    const estado = (regiao.match(/,\s*([A-Z]{2})\s*$/)||[])[1] || '';
+    if(norm(nome) === 'nome') continue;
+    const regiao = r[1] == null ? '' : String(r[1]).trim();
+    const estado = (regiao.match(/,\s*([A-Za-z]{2})\s*$/) || [])[1] || '';
     const mods = {}, raw = {};
-    let n_concluido=0,n_apto=0,n_inscrito=0;
-    modules.forEach((m,mi)=>{
-      const val = r[2+mi];
-      raw[m] = val==null||val==='' ? '' : String(val);
+    let n_concluido = 0, n_apto = 0, n_inscrito = 0;
+    modules.forEach((m, mi) => {
+      const val = r[2 + mi];
+      raw[m] = val == null || val === '' ? '' : String(val);
       const st = normStatusMod(val);
       mods[m] = st;
-      if(st==='concluido') n_concluido++;
-      else if(st==='apto') n_apto++;
-      else if(st==='inscrito') n_inscrito++;
+      if(st === 'concluido') n_concluido++;
+      else if(st === 'apto') n_apto++;
+      else if(st === 'inscrito') n_inscrito++;
     });
-    const pct = modules.length ? Math.round(n_concluido/modules.length*100) : 0;
-    people.push({nome,regiao,estado,mods,raw,n_concluido,n_apto,n_inscrito,pct});
+    const pct = modules.length ? Math.round(n_concluido / modules.length * 100) : 0;
+    people.push({nome, regiao, estado, mods, raw, n_concluido, n_apto, n_inscrito, pct});
   }
+  if(!people.length) return null;
   return {
-    modules, short, people,
-    cron: [], months: [],
+    modules, short, people, cron: [], months: [],
     kpis: {
       tecnicos: people.length,
-      progresso: people.length ? Math.round(people.reduce((s,p)=>s+p.pct,0)/people.length) : 0,
-      com_apto: people.filter(p=>p.n_apto>0).length,
-      trilha: people.filter(p=>p.n_concluido===modules.length).length
+      progresso: Math.round(people.reduce((s,p)=>s+p.pct,0) / people.length),
+      com_apto: people.filter(p => p.n_apto > 0).length,
+      trilha: people.filter(p => p.n_concluido === modules.length).length
     },
     updated: new Date().toISOString().slice(0,10)
   };
 }
+
 function parseSGQ(wb){
-  const name = wb.SheetNames.find(n => n.toLowerCase().includes('lista mestra') || n.toLowerCase().includes('mestra'))
-    || '05 Lista Mestra SGQ';
-  const rows = sheetToRows(wb, name);
+  const name = findSheet(wb, [
+    n => norm(n).includes('lista mestra'),
+    n => norm(n).includes('mestra'),
+    '05 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
   if(!rows) return null;
-  const hi = findHeaderRow(rows, ['código','título']);
+  const hi = findHeaderRow(rows, ['codigo']);
   if(hi < 0) return null;
-  const H = rows[hi].map(c => c==null?'':String(c).trim().toLowerCase());
-  const idx = (labels) => {
-    for(const lab of labels){
-      const i = H.findIndex(h => h.includes(lab));
-      if(i>=0) return i;
-    }
-    return -1;
-  };
-  const iCod = idx(['código','codigo']);
-  const iTipo = idx(['tipo']);
-  const iTit = idx(['título','titulo']);
-  const iArea = idx(['área','area']);
-  const iResp = idx(['responsável','responsavel']);
-  const iGest = idx(['gestor']);
-  const iCrit = idx(['criticidade']);
-  const iUlt = idx(['última revisão','ultima revisao','data da última']);
-  const iProx = idx(['próxima revisão','proxima revisao']);
-  const iSit = idx(['situação','situacao']);
-  const iStat = idx(['status']);
-  const iDias = idx(['dias']);
+  const header = rows[hi] || [];
+  const iCod = colIndex(header, ['código', 'codigo']);
+  const iTipo = colIndex(header, ['tipo']);
+  const iTit = colIndex(header, ['título do documento', 'titulo do documento', 'título', 'titulo']);
+  const iArea = colIndex(header, ['área', 'area']);
+  const iResp = colIndex(header, ['responsável técnico', 'responsavel tecnico', 'responsável', 'responsavel']);
+  const iGest = colIndex(header, ['gestor aprovador', 'gestor']);
+  const iCrit = colIndex(header, ['criticidade']);
+  const iUlt = colIndex(header, ['data da última revisão', 'ultima revisao', 'última revisão']);
+  const iProx = colIndex(header, ['próxima revisão', 'proxima revisao']);
+  const iSit = colIndex(header, ['situação', 'situacao']);
+  const iStat = colIndex(header, ['status']);
+  const iDias = colIndex(header, ['dias restantes', 'dias']);
+  if(iCod < 0) return null;
   const docs = [];
-  for(let i=hi+1;i<rows.length;i++){
+  for(let i = hi + 1; i < rows.length; i++){
     const r = rows[i];
-    if(!r || r[iCod]==null || r[iCod]==='') continue;
+    if(!r || r[iCod] == null || r[iCod] === '') continue;
     const prox = fmtDateISO(r[iProx]);
     const ult = fmtDateISO(r[iUlt]);
-    const situacao = iSit>=0 && r[iSit]!=null ? String(r[iSit]) : 'Ativo';
-    let dias = iDias>=0 && r[iDias]!=null && r[iDias]!=='' ? Number(r[iDias]) : daysUntil(prox);
+    const situacao = iSit >= 0 && r[iSit] != null ? String(r[iSit]) : 'Ativo';
+    let dias = iDias >= 0 && r[iDias] != null && r[iDias] !== '' ? Number(r[iDias]) : daysUntil(prox);
     if(Number.isNaN(dias)) dias = daysUntil(prox);
-    let status = iStat>=0 && r[iStat] ? String(r[iStat]) : statusFromDays(dias, situacao);
+    let status = iStat >= 0 && r[iStat] ? String(r[iStat]) : statusFromDays(dias, situacao);
     docs.push({
       codigo: String(r[iCod]),
-      tipo: iTipo>=0 && r[iTipo]!=null ? String(r[iTipo]) : '',
-      titulo: iTit>=0 && r[iTit]!=null ? String(r[iTit]) : '',
-      area: iArea>=0 && r[iArea]!=null ? String(r[iArea]) : '',
-      responsavel: iResp>=0 && r[iResp]!=null ? String(r[iResp]) : '',
-      gestor: iGest>=0 && r[iGest]!=null ? String(r[iGest]) : '',
-      criticidade: iCrit>=0 && r[iCrit]!=null ? String(r[iCrit]) : '',
+      tipo: iTipo >= 0 && r[iTipo] != null ? String(r[iTipo]) : '',
+      titulo: iTit >= 0 && r[iTit] != null ? String(r[iTit]) : '',
+      area: iArea >= 0 && r[iArea] != null ? String(r[iArea]) : '',
+      responsavel: iResp >= 0 && r[iResp] != null ? String(r[iResp]) : '',
+      gestor: iGest >= 0 && r[iGest] != null ? String(r[iGest]) : '',
+      criticidade: iCrit >= 0 && r[iCrit] != null ? String(r[iCrit]) : '',
       ultima_revisao: ult,
       proxima_revisao: prox,
       dias_restantes: dias,
@@ -418,124 +466,134 @@ function parseSGQ(wb){
       situacao
     });
   }
-  return docs;
-}
-function parseFluxos(wb){
-  const name = wb.SheetNames.find(n => n.toLowerCase().includes('fluxograma') && !n.toLowerCase().includes('base'))
-    || '06 Fluxogramas';
-  const rows = sheetToRows(wb, name);
-  if(!rows) return null;
-  const hi = findHeaderRow(rows, ['área','processo']) >= 0
-    ? findHeaderRow(rows, ['área','processo'])
-    : findHeaderRow(rows, ['area','processo']);
-  if(hi < 0) return null;
-  const H = rows[hi].map(c => c==null?'':String(c).trim().toLowerCase());
-  const iArea = H.findIndex(h => h.includes('área')||h.includes('area'));
-  const iProc = H.findIndex(h => h.includes('processo'));
-  const iStat = H.findIndex(h => h.includes('status'));
-  const iObs = H.findIndex(h => h.includes('obs'));
-  const out = [];
-  for(let i=hi+1;i<rows.length;i++){
-    const r = rows[i];
-    if(!r || r[iArea]==null || r[iArea]==='') continue;
-    out.push({
-      area: String(r[iArea]),
-      processo: iProc>=0 && r[iProc]!=null ? String(r[iProc]) : '',
-      status: iStat>=0 && r[iStat]!=null ? String(r[iStat]) : '',
-      obs: iObs>=0 && r[iObs]!=null ? String(r[iObs]) : ''
-    });
-  }
-  return out;
-}
-function parseASEC(wb){
-  // Keep structure flexible: read auditorias block if present
-  const name = wb.SheetNames.find(n => n.toLowerCase().includes('auditoria')) || '03 ASEC Auditorias';
-  const rows = sheetToRows(wb, name);
-  if(!rows) return null;
-  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  // find header Mês / Realizadas
-  let hi = -1;
-  for(let i=0;i<rows.length;i++){
-    const r = (rows[i]||[]).map(c=>c==null?'':String(c).toLowerCase());
-    if(r[0]==='mês'||r[0]==='mes'){ if(r.some(x=>x.includes('realiz'))) { hi=i; break; } }
-  }
-  const auditorias = [];
-  if(hi>=0){
-    for(let i=hi+1;i<rows.length;i++){
-      const r = rows[i];
-      if(!r || r[0]==null) continue;
-      const mes = String(r[0]).trim();
-      if(!meses.includes(mes) && !meses.some(m=>m.startsWith(mes.slice(0,3)))) {
-        if(String(r[0]).toLowerCase().includes('não conf')||String(r[0]).toLowerCase().includes('nc')) break;
-        continue;
-      }
-      auditorias.push({mes, v1: r[1]==null?null:Number(r[1]), v2: r[2]==null?null:Number(r[2])});
-    }
-  }
-  return {
-    meses,
-    mes_vigente: new Date().getMonth()+1,
-    auditorias,
-    nc_matriz: [],
-    nc_itajai: [],
-    assertividade_matriz: [],
-    assertividade_itajai: []
-  };
-}
-function parseDealer(wb){
-  const name = wb.SheetNames.find(n => n.toLowerCase().includes('dealer')) || '08 Dealer Evaluation - ASEC';
-  const rows = sheetToRows(wb, name);
-  if(!rows) return null;
-  let hi = -1;
-  for(let i=0;i<Math.min(rows.length,20);i++){
-    const r = (rows[i]||[]).map(c=>c==null?'':String(c).toLowerCase());
-    if(r.some(x=>x==='dealer') && r.some(x=>x.includes('geral')||x.includes('nota'))){ hi=i; break; }
-  }
-  if(hi<0) return [];
-  const H = rows[hi];
-  // sparse columns: Dealer, empty, Mês, empty, Nota Geral, empty, Nota Mandatória
-  const out = [];
-  for(let i=hi+1;i<rows.length;i++){
-    const r = rows[i];
-    if(!r || r[0]==null || r[0]==='') continue;
-    const dealer = String(r[0]).trim();
-    if(dealer.toLowerCase()==='dealer') continue;
-    const mesRaw = r[2];
-    let mes_num = null;
-    if(typeof mesRaw === 'number' && mesRaw > 40000){
-      const d = XLSX.SSF.parse_date_code(mesRaw);
-      if(d) mes_num = d.m;
-    } else {
-      const iso = fmtDateISO(mesRaw);
-      if(iso) mes_num = Number(iso.slice(5,7));
-    }
-    const geral = r[4]==null||r[4]===''?null:Number(r[4]);
-    const mandatoria = r[6]==null||r[6]===''?null:Number(r[6]);
-    out.push({dealer, mes_num, geral, mandatoria});
-  }
-  return out;
+  return docs.length ? docs : null;
 }
 
-function setStatus(msg, cls){
-  const el = document.getElementById('import-status');
-  if(!el) return;
-  el.textContent = msg;
-  el.className = 'import-status' + (cls?(' '+cls):'');
+function parseFluxos(wb){
+  const name = findSheet(wb, [
+    n => norm(n).includes('fluxograma') && !norm(n).includes('base'),
+    n => norm(n) === '06 fluxogramas' || norm(n).startsWith('06 '),
+    '06 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
+  if(!rows) return null;
+  const hi = findHeaderRow(rows, ['processo']);
+  if(hi < 0) return null;
+  const header = rows[hi] || [];
+  const iArea = colIndex(header, ['área / subárea', 'area / subarea', 'área', 'area']);
+  const iProc = colIndex(header, ['processo mapeado', 'processo']);
+  const iStat = colIndex(header, ['status']);
+  const iObs = colIndex(header, ['observações', 'observacoes', 'obs']);
+  const out = [];
+  for(let i = hi + 1; i < rows.length; i++){
+    const r = rows[i];
+    if(!r || (iArea >= 0 && (r[iArea] == null || r[iArea] === ''))) continue;
+    out.push({
+      area: iArea >= 0 ? String(r[iArea]) : '',
+      processo: iProc >= 0 && r[iProc] != null ? String(r[iProc]) : '',
+      status: iStat >= 0 && r[iStat] != null ? String(r[iStat]) : '',
+      obs: iObs >= 0 && r[iObs] != null ? String(r[iObs]) : ''
+    });
+  }
+  return out.length ? out : null;
+}
+
+function parseASEC(wb){
+  const name = findSheet(wb, [
+    n => norm(n).includes('auditoria'),
+    '03 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
+  if(!rows) return null;
+  const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  let hi = -1;
+  for(let i = 0; i < rows.length; i++){
+    const c0 = norm((rows[i] || [])[0]);
+    const row = (rows[i] || []).map(c => norm(c));
+    if((c0 === 'mes' || c0 === 'mês') && row.some(x => x.includes('realiz'))){ hi = i; break; }
+  }
+  const auditorias = [];
+  if(hi >= 0){
+    for(let i = hi + 1; i < rows.length; i++){
+      const r = rows[i];
+      if(!r || r[0] == null) continue;
+      const mes = String(r[0]).trim();
+      if(!meses.includes(mes)) {
+        if(norm(mes).includes('nao conf') || norm(mes).includes('nc') || norm(mes).includes('assert')) break;
+        continue;
+      }
+      auditorias.push({
+        mes,
+        v1: r[1] == null || r[1] === '' ? null : Number(r[1]),
+        v2: r[2] == null || r[2] === '' ? null : Number(r[2])
+      });
+    }
+  }
+  if(!auditorias.length) return null;
+  return {
+    meses,
+    mes_vigente: new Date().getMonth() + 1,
+    auditorias,
+    nc_matriz: [], nc_itajai: [],
+    assertividade_matriz: [], assertividade_itajai: []
+  };
+}
+
+function parseDealer(wb){
+  const name = findSheet(wb, [
+    n => norm(n).includes('dealer'),
+    '08 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
+  if(!rows) return null;
+  let hi = -1;
+  for(let i = 0; i < Math.min(rows.length, 25); i++){
+    const row = (rows[i] || []).map(c => norm(c));
+    if(row.some(x => x === 'dealer') && row.some(x => x.includes('geral') || x.includes('nota'))){ hi = i; break; }
+  }
+  if(hi < 0) return null;
+  const out = [];
+  for(let i = hi + 1; i < rows.length; i++){
+    const r = rows[i];
+    if(!r || r[0] == null || r[0] === '') continue;
+    const dealer = String(r[0]).trim();
+    if(norm(dealer) === 'dealer') continue;
+    const mesRaw = r[2];
+    let mes_num = null;
+    if(typeof mesRaw === 'number' && mesRaw > 30000){
+      try{
+        const d = XLSX.SSF.parse_date_code(mesRaw);
+        if(d) mes_num = d.m;
+      }catch(e){}
+    } else {
+      const iso = fmtDateISO(mesRaw);
+      if(iso) mes_num = Number(iso.slice(5, 7));
+    }
+    const geral = r[4] == null || r[4] === '' ? null : Number(r[4]);
+    const mandatoria = r[6] == null || r[6] === '' ? null : Number(r[6]);
+    out.push({dealer, mes_num, geral, mandatoria});
+  }
+  return out.length ? out : null;
 }
 
 async function handleImportFile(file){
   if(!file) return;
   if(typeof XLSX === 'undefined'){
-    setStatus('Biblioteca de Excel não carregou. Verifique a internet.', 'err');
+    setStatus('Não carregou a leitura de Excel. Abra com internet e recarregue a página.', 'err');
     return;
   }
-  setStatus('Lendo planilha…', '');
+  setStatus('Lendo “' + file.name + '”…', '');
   try{
     const buf = await file.arrayBuffer();
-    const wb = XLSX.read(buf, {type:'array', cellDates:true});
+    const wb = XLSX.read(buf, {type: 'array', cellDates: true});
+    const sheets = wb.SheetNames || [];
     const payload = {
       importedAt: new Date().toISOString(),
       fileName: file.name,
+      sheetNames: sheets,
       treinamentos: parseTreinamentos(wb),
       docs: parseSGQ(wb),
       fluxos: parseFluxos(wb),
@@ -543,30 +601,31 @@ async function handleImportFile(file){
       dealer: parseDealer(wb)
     };
     const parts = [];
-    if(payload.treinamentos) parts.push(`${payload.treinamentos.people.length} técnicos`);
-    if(payload.docs) parts.push(`${payload.docs.length} docs`);
-    if(payload.fluxos) parts.push(`${payload.fluxos.length} fluxos`);
-    if(payload.dealer) parts.push(`${payload.dealer.length} dealer rows`);
+    if(payload.treinamentos) parts.push(payload.treinamentos.people.length + ' técnicos');
+    if(payload.docs) parts.push(payload.docs.length + ' docs');
+    if(payload.fluxos) parts.push(payload.fluxos.length + ' fluxos');
+    if(payload.dealer) parts.push(payload.dealer.length + ' dealer');
+    if(payload.asec) parts.push('ASEC ok');
     if(!parts.length){
-      setStatus('Não reconheci as abas. Use a planilha modelo Carmak.', 'err');
+      setStatus('Não reconheci os dados. Abas no arquivo: ' + sheets.join(' | '), 'err');
+      console.log('Import debug', {sheets, payload});
       return;
     }
     localStorage.setItem(LS_KEY, JSON.stringify(payload));
-    setStatus('Salvo no navegador · '+parts.join(' · '), 'ok');
-    // refresh open iframe if any
-    if(current && frames[current]){
+    setStatus('Importado · ' + parts.join(' · ') + ' · reabra o módulo', 'ok');
+    if(typeof current !== 'undefined' && current && frames[current]){
       try { frames[current].contentWindow.location.reload(); } catch(e){}
     }
   }catch(err){
     console.error(err);
-    setStatus('Erro ao ler: '+(err.message||err), 'err');
+    setStatus('Erro: ' + (err.message || err), 'err');
   }
 }
 
 function clearSaved(){
   localStorage.removeItem(LS_KEY);
-  setStatus('Dados salvos removidos. Módulos usam base embutida.', 'ok');
-  if(current && frames[current]){
+  setStatus('Dados salvos removidos. Usando base embutida.', 'ok');
+  if(typeof current !== 'undefined' && current && frames[current]){
     try { frames[current].contentWindow.location.reload(); } catch(e){}
   }
 }
@@ -577,13 +636,13 @@ function showSavedStatus(){
     if(!raw) return;
     const p = JSON.parse(raw);
     const when = p.importedAt ? new Date(p.importedAt).toLocaleString('pt-BR') : '';
-    setStatus('Dados salvos'+(p.fileName?(' · '+p.fileName):'')+(when?(' · '+when):''), 'ok');
+    setStatus('Salvo no navegador' + (p.fileName ? (' · ' + p.fileName) : '') + (when ? (' · ' + when) : ''), 'ok');
   }catch(e){}
 }
 
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', function(){
   const input = document.getElementById('xlsx-input');
-  if(input) input.addEventListener('change', e=>{
+  if(input) input.addEventListener('change', function(e){
     const f = e.target.files && e.target.files[0];
     handleImportFile(f);
     e.target.value = '';
