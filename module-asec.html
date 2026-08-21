@@ -416,16 +416,17 @@ table.doc-table tbody tr:nth-child(even):hover{ background: var(--tint-2); }
     const raw = localStorage.getItem('carmak_qualidade_v1');
     if(!raw) return;
     const p = JSON.parse(raw);
-    if(p.asec && p.asec.auditorias && p.asec.auditorias.length){
+    if(p.asec){
       const el = document.getElementById('asec-data');
       if(el){
         const cur = JSON.parse(el.textContent);
-        cur.auditorias = p.asec.auditorias;
-        if(p.asec.nc_matriz && p.asec.nc_matriz.length) cur.nc_matriz = p.asec.nc_matriz;
-        if(p.asec.nc_itajai && p.asec.nc_itajai.length) cur.nc_itajai = p.asec.nc_itajai;
-        if(p.asec.assertividade_matriz && p.asec.assertividade_matriz.length) cur.assertividade_matriz = p.asec.assertividade_matriz;
-        if(p.asec.assertividade_itajai && p.asec.assertividade_itajai.length) cur.assertividade_itajai = p.asec.assertividade_itajai;
-        if(p.asec.mes_vigente) cur.mes_vigente = p.asec.mes_vigente;
+        const a = p.asec;
+        if(a.auditorias && a.auditorias.length) cur.auditorias = a.auditorias;
+        if(a.nc_matriz && a.nc_matriz.length) cur.nc_matriz = a.nc_matriz;
+        if(a.nc_itajai && a.nc_itajai.length) cur.nc_itajai = a.nc_itajai;
+        if(a.assertividade_matriz && a.assertividade_matriz.length) cur.assertividade_matriz = a.assertividade_matriz;
+        if(a.assertividade_itajai && a.assertividade_itajai.length) cur.assertividade_itajai = a.assertividade_itajai;
+        if(a.mes_vigente) cur.mes_vigente = a.mes_vigente;
         el.textContent = JSON.stringify(cur);
       }
     }

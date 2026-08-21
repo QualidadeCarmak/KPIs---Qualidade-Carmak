@@ -508,36 +508,144 @@ function parseASEC(wb){
   const rows = sheetRows(wb, name);
   if(!rows) return null;
   const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  let hi = -1;
-  for(let i = 0; i < rows.length; i++){
-    const c0 = norm((rows[i] || [])[0]);
-    const row = (rows[i] || []).map(c => norm(c));
-    if((c0 === 'mes' || c0 === 'mês') && row.some(x => x.includes('realiz'))){ hi = i; break; }
-  }
-  const auditorias = [];
-  if(hi >= 0){
+
+  function readMesTable(startHint){
+    let hi = -1;
+    for(let i = 0; i < rows.length; i++){
+      const c0 = norm((rows[i] || [])[0]);
+      if(c0 === 'mes' || c0 === 'mês'){
+        // check we're near the hint section
+        const prev = rows.slice(Math.max(0,i-5), i).map(r => norm((r||[])[0])).join(' ');
+        if(!startHint || prev.includes(norm(startHint)) || hi < 0){
+          hi = i;
+          if(startHint && prev.includes(norm(startHint))) break;
+        }
+      }
+    }
+    if(hi < 0) return [];
+    const out = [];
     for(let i = hi + 1; i < rows.length; i++){
       const r = rows[i];
-      if(!r || r[0] == null) continue;
+      if(!r || r[0] == null || r[0] === '') continue;
       const mes = String(r[0]).trim();
-      if(!meses.includes(mes)) {
-        if(norm(mes).includes('nao conf') || norm(mes).includes('nc') || norm(mes).includes('assert')) break;
-        continue;
+      if(!meses.includes(mes)) break;
+      const v1 = r[1] == null || r[1] === '' ? null : Number(r[1]);
+      const v2 = r[2] == null || r[2] === '' ? null : Number(r[2]);
+      out.push({mes, v1: Number.isNaN(v1) ? null : v1, v2: Number.isNaN(v2) ? null : v2});
+    }
+    return out;
+  }
+
+  // locate sections by title rows
+  let aud = [], ncM = [], ncI = [];
+  for(let i = 0; i < rows.length; i++){
+    const t = norm((rows[i] || [])[0]);
+    if(t.includes('auditorias asec') || (t.includes('realizadas') && t.includes('planejadas'))){
+      // next header Mês
+      for(let j = i; j < Math.min(i+5, rows.length); j++){
+        if(norm((rows[j]||[])[0]) === 'mes' || norm((rows[j]||[])[0]) === 'mês'){
+          for(let k = j+1; k < rows.length; k++){
+            const r = rows[k];
+            if(!r || r[0]==null) break;
+            const mes = String(r[0]).trim();
+            if(!meses.includes(mes)) break;
+            const v1 = r[1]==null||r[1]===''?null:Number(r[1]);
+            const v2 = r[2]==null||r[2]===''?null:Number(r[2]);
+            aud.push({mes, v1: Number.isNaN(v1)?null:v1, v2: Number.isNaN(v2)?null:v2});
+          }
+          break;
+        }
       }
-      auditorias.push({
-        mes,
-        v1: r[1] == null || r[1] === '' ? null : Number(r[1]),
-        v2: r[2] == null || r[2] === '' ? null : Number(r[2])
-      });
+    }
+    if(t.includes('nao conformidades') && t.includes('matriz')){
+      for(let j = i; j < Math.min(i+5, rows.length); j++){
+        if(norm((rows[j]||[])[0]) === 'mes' || norm((rows[j]||[])[0]) === 'mês'){
+          for(let k = j+1; k < rows.length; k++){
+            const r = rows[k];
+            if(!r || r[0]==null) break;
+            const mes = String(r[0]).trim();
+            if(!meses.includes(mes)) break;
+            const v1 = r[1]==null||r[1]===''?null:Number(r[1]);
+            const v2 = r[2]==null||r[2]===''?null:Number(r[2]);
+            ncM.push({mes, v1: Number.isNaN(v1)?null:v1, v2: Number.isNaN(v2)?null:v2});
+          }
+          break;
+        }
+      }
+    }
+    if(t.includes('nao conformidades') && (t.includes('itajai') || t.includes('itajaí'))){
+      for(let j = i; j < Math.min(i+5, rows.length); j++){
+        if(norm((rows[j]||[])[0]) === 'mes' || norm((rows[j]||[])[0]) === 'mês'){
+          for(let k = j+1; k < rows.length; k++){
+            const r = rows[k];
+            if(!r || r[0]==null) break;
+            const mes = String(r[0]).trim();
+            if(!meses.includes(mes)) break;
+            const v1 = r[1]==null||r[1]===''?null:Number(r[1]);
+            const v2 = r[2]==null||r[2]===''?null:Number(r[2]);
+            ncI.push({mes, v1: Number.isNaN(v1)?null:v1, v2: Number.isNaN(v2)?null:v2});
+          }
+          break;
+        }
+      }
     }
   }
-  if(!auditorias.length) return null;
+  if(!aud.length) aud = readMesTable('auditoria');
+
+  // Assertividade sheet
+  let assertM = [], assertI = [];
+  const nameA = findSheet(wb, [n => norm(n).includes('assertividade'), '04 ']);
+  if(nameA){
+    const arows = sheetRows(wb, nameA);
+    function readAssert(sectionHint){
+      let start = -1;
+      for(let i = 0; i < arows.length; i++){
+        const t = norm((arows[i]||[])[0]);
+        if(t.includes(norm(sectionHint))){ start = i; break; }
+      }
+      if(start < 0) return [];
+      let hi = -1;
+      for(let i = start; i < Math.min(start+6, arows.length); i++){
+        if(norm((arows[i]||[])[0]) === 'setor'){ hi = i; break; }
+      }
+      if(hi < 0) return [];
+      const out = [];
+      for(let i = hi+1; i < arows.length; i++){
+        const r = arows[i];
+        if(!r || r[0]==null || r[0]==='') break;
+        const setor = String(r[0]).trim();
+        if(norm(setor) === 'setor') continue;
+        if(norm(setor).includes('assertividade')) break;
+        const valores = [];
+        for(let c = 1; c <= 12; c++){
+          const v = r[c];
+          if(v==null || v==='') valores.push(null);
+          else {
+            let num = Number(v);
+            if(Number.isNaN(num)) valores.push(null);
+            else {
+              if(num > 1.5) num = num / 100; // percentual
+              valores.push(num);
+            }
+          }
+        }
+        out.push({setor, valores});
+      }
+      return out;
+    }
+    assertM = readAssert('matriz');
+    assertI = readAssert('itajai');
+  }
+
+  if(!aud.length && !ncM.length && !assertM.length) return null;
   return {
     meses,
     mes_vigente: new Date().getMonth() + 1,
-    auditorias,
-    nc_matriz: [], nc_itajai: [],
-    assertividade_matriz: [], assertividade_itajai: []
+    auditorias: aud,
+    nc_matriz: ncM,
+    nc_itajai: ncI,
+    assertividade_matriz: assertM,
+    assertividade_itajai: assertI
   };
 }
 
@@ -579,6 +687,42 @@ function parseDealer(wb){
   return out.length ? out : null;
 }
 
+
+function parseCronograma(wb){
+  const name = findSheet(wb, [
+    n => norm(n).includes('cronograma'),
+    '02 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
+  if(!rows) return null;
+  let hi = -1;
+  for(let i = 0; i < Math.min(rows.length, 15); i++){
+    if(norm((rows[i]||[])[0]).includes('treinamento')){ hi = i; break; }
+  }
+  if(hi < 0) return null;
+  const header = rows[hi] || [];
+  const months = [];
+  for(let c = 1; c < header.length; c++){
+    if(header[c] != null && String(header[c]).trim() !== '') months.push(String(header[c]).trim());
+  }
+  if(!months.length) return null;
+  const cron = [];
+  for(let i = hi + 1; i < rows.length; i++){
+    const r = rows[i];
+    if(!r || r[0] == null || r[0] === '') continue;
+    const nome = String(r[0]).trim();
+    if(norm(nome) === 'treinamento') continue;
+    const slots = months.map((_, mi) => {
+      const v = r[1 + mi];
+      if(v == null || v === '') return null;
+      return String(v).replace(/\n/g, ' ').trim();
+    });
+    cron.push({nome, slots});
+  }
+  return cron.length ? {cron, months} : null;
+}
+
 async function handleImportFile(file){
   if(!file) return;
   if(typeof XLSX === 'undefined'){
@@ -590,14 +734,21 @@ async function handleImportFile(file){
     const buf = await file.arrayBuffer();
     const wb = XLSX.read(buf, {type: 'array', cellDates: true});
     const sheets = wb.SheetNames || [];
+    const trein = parseTreinamentos(wb);
+    const cronPack = parseCronograma(wb);
+    if(trein && cronPack){
+      trein.cron = cronPack.cron;
+      trein.months = cronPack.months;
+    }
+    const asecPack = parseASEC(wb);
     const payload = {
       importedAt: new Date().toISOString(),
       fileName: file.name,
       sheetNames: sheets,
-      treinamentos: parseTreinamentos(wb),
+      treinamentos: trein,
       docs: parseSGQ(wb),
       fluxos: parseFluxos(wb),
-      asec: parseASEC(wb),
+      asec: asecPack,
       dealer: parseDealer(wb)
     };
     const parts = [];
@@ -605,7 +756,13 @@ async function handleImportFile(file){
     if(payload.docs) parts.push(payload.docs.length + ' docs');
     if(payload.fluxos) parts.push(payload.fluxos.length + ' fluxos');
     if(payload.dealer) parts.push(payload.dealer.length + ' dealer');
-    if(payload.asec) parts.push('ASEC ok');
+    if(payload.asec){
+      const a = payload.asec;
+      parts.push('ASEC ' + (a.auditorias||[]).length + 'm');
+      if((a.nc_matriz||[]).length) parts.push('NC Matriz');
+      if((a.assertividade_matriz||[]).length) parts.push('Assert.');
+    }
+    if(payload.treinamentos && payload.treinamentos.cron && payload.treinamentos.cron.length) parts.push('cronograma');
     if(!parts.length){
       setStatus('Não reconheci os dados. Abas no arquivo: ' + sheets.join(' | '), 'err');
       console.log('Import debug', {sheets, payload});

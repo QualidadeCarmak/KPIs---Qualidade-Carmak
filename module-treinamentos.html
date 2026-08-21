@@ -924,12 +924,29 @@ function init(){
     if(p.treinamentos && p.treinamentos.people && p.treinamentos.people.length){
       const t = p.treinamentos;
       if(t.people) DATA.people = t.people;
-      if(t.modules) DATA.modules = t.modules;
+      if(t.modules && t.modules.length) DATA.modules = t.modules;
       if(t.short) DATA.short = t.short;
-      if(t.kpis) DATA.kpis = t.kpis;
       if(t.cron && t.cron.length) DATA.cron = t.cron;
       if(t.months && t.months.length) DATA.months = t.months;
       if(t.updated) DATA.updated = t.updated;
+      // recalcula KPIs no formato do módulo (não usa kpis simplificado da importação)
+      const M = DATA.modules;
+      const s1 = M.filter(m => m.includes('STEP 1 TO/BT'));
+      const s2 = M.filter(m => m.includes('STEP 2 TO'));
+      const s3 = M.filter(m => m.includes('STEP 3 TO'));
+      const bt1 = M.filter(m => m === 'STEP 1 BT');
+      const bt2 = M.filter(m => m === 'STEP 2 BT');
+      const allC = (p,g) => g.every(m => p.mods[m] === 'concluido');
+      DATA.kpis = {
+        total: DATA.people.length,
+        s1: DATA.people.filter(p => allC(p,s1)).length,
+        s2: DATA.people.filter(p => allC(p,s2)).length,
+        s3: DATA.people.filter(p => allC(p,s3)).length,
+        bt1: DATA.people.filter(p => allC(p,bt1)).length,
+        bt2: DATA.people.filter(p => allC(p,bt2)).length,
+        aptos: DATA.people.filter(p => (p.n_apto||0) > 0).length,
+        inscritos: DATA.people.filter(p => (p.n_inscrito||0) > 0 && (p.n_concluido||0) === 0).length
+      };
     }
   }catch(e){ console.warn('import override trein', e); }
 })();
