@@ -6,10 +6,10 @@
 <title>Relatório Gerencial · Qualidade Carmak · YTD 2026 · referência até Julho</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--navy:#0B3B3E;--accent:#3FA796;--line:#D5E8E3;--ink:#0E2A2C;--muted:#5E7876;--ok:#1E7F72;--warn:#B0500E;--crit:#C6483E}
+:root{--navy:#1A1A1A;--accent:#D4B56A;--line:#E0DDD4;--ink:#141414;--muted:#6B6B63;--ok:#C4A35A;--warn:#B0500E;--crit:#C6483E}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Inter,system-ui,sans-serif;background:#E8F2EF;color:var(--ink);font-size:12.5px;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.toolbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#072628,#0B3B3E);color:#fff;padding:10px 20px;display:flex;align-items:center;gap:12px}
+body{font-family:Inter,system-ui,sans-serif;background:#F0EFEA;color:var(--ink);font-size:12.5px;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.toolbar{position:sticky;top:0;z-index:20;background:linear-gradient(135deg,#111111,#1A1A1A);color:#fff;padding:10px 20px;display:flex;align-items:center;gap:12px}
 .toolbar img{height:20px}.toolbar b{flex:1;font-family:Space Grotesk,sans-serif;font-size:13px}
 .btn{border:none;border-radius:99px;padding:7px 14px;font:600 12px Inter,sans-serif;cursor:pointer;text-decoration:none}
 .btn-p{background:#fff;color:var(--navy)}.btn-b{background:rgba(255,255,255,.15);color:#fff}
@@ -20,41 +20,41 @@ body{font-family:Inter,system-ui,sans-serif;background:#E8F2EF;color:var(--ink);
 .cover .sub{color:var(--muted);font-size:12px;margin-top:2px}
 .cover img{height:26px;margin-bottom:6px;filter:brightness(0) saturate(100%) invert(14%) sepia(18%) saturate(1200%) hue-rotate(140deg)}
 .meta{text-align:right;font-size:11.5px;color:var(--muted);line-height:1.5}.meta b{color:var(--ink)}
-.h{font-family:Space Grotesk,sans-serif;font-size:14.5px;font-weight:700;color:#fff;margin:16px 0 12px;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#0B3B3E,#1E7F72);padding:8px 14px;border-radius:8px}
+.h{font-family:Space Grotesk,sans-serif;font-size:14.5px;font-weight:700;color:#fff;margin:16px 0 12px;display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,#1A1A1A,#2D2D2D);padding:8px 14px;border-radius:8px}
 .h::after{content:"";flex:1;height:1px;background:rgba(255,255,255,.25)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
 .kpis3{grid-template-columns:repeat(3,1fr)}
-.kpi{background:linear-gradient(160deg,#0F4C52,#1E7F72);border:none;border-radius:10px;padding:12px 14px;color:#fff;box-shadow:0 4px 12px rgba(11,59,62,.12)}
+.kpi{background:linear-gradient(160deg,#1A1A1A,#2D2D2D);border:none;border-radius:10px;padding:12px 14px;color:#fff;box-shadow:0 4px 12px rgba(11,59,62,.12)}
 .kpi .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.04em;color:rgba(255,255,255,.85);font-weight:600}
 .kpi .v{font-family:Space Grotesk,sans-serif;font-size:22px;font-weight:700;color:#fff;line-height:1.1;margin:2px 0}
 .kpi .s{font-size:10.5px;color:rgba(255,255,255,.8)}
-.kpi.ok{background:linear-gradient(160deg,#0F4C52,#1E7F72)}
+.kpi.ok{background:linear-gradient(160deg,#2A2418,#C4A35A)}
 .kpi.warn{background:linear-gradient(160deg,#8A4A12,#B0500E)}
 .kpi.crit{background:linear-gradient(160deg,#8B2E28,#C6483E)}
-.kpi.navy{background:linear-gradient(160deg,#0B3B3E,#0F4C52)}
+.kpi.navy{background:linear-gradient(160deg,#1A1A1A,#2D2D2D)}
 .kpi.gold{background:linear-gradient(160deg,#8B6914,#C79A45)}
 .kpi.crit .v,.kpi.warn .v,.kpi.ok .v{color:#fff}
 .pill{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
-.pill-ok{background:#E4F5EE;color:#1E7F72}.pill-warn{background:#FFEADD;color:#B0500E}
+.pill-ok{background:#E4F5EE;color:#C4A35A}.pill-warn{background:#FFEADD;color:#B0500E}
 .pill-crit{background:#FBEAE8;color:#C6483E}.pill-off{background:#EBEDF0;color:#565D6B}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
 .tbl{width:100%;border-collapse:collapse;font-size:11.5px}
 .tbl th{background:var(--navy);color:#fff;text-align:left;padding:6px 8px;font-size:10px;text-transform:uppercase}
 .tbl td{padding:5px 8px;border-bottom:1px solid var(--line)}
-.tbl tr:nth-child(even) td{background:#F8FBFA}
-.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;background:#F0F5F3;margin:3px 4px 3px 0;font-size:11.5px}
+.tbl tr:nth-child(even) td{background:#F8F7F3}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:8px;background:#F2F0EA;margin:3px 4px 3px 0;font-size:11.5px}
 .chip-ok{background:#E4F5EE}.chip-warn{background:#FFEADD}.chip-crit{background:#FBEAE8}
 .chip-n{color:var(--muted)}.chip-v{font-weight:700;color:var(--navy)}
 .chip-warn .chip-v{color:var(--warn)}.chip-crit .chip-v{color:var(--crit)}
-.dcard{border:1px solid var(--line);border-radius:10px;padding:12px;background:#F7FBFA}
+.dcard{border:1px solid var(--line);border-radius:10px;padding:12px;background:#F7F6F2}
 .dcard h4{font-size:12.5px;color:var(--navy);margin-bottom:2px}
 .dcard .dm{font-size:10.5px;color:var(--muted);margin-bottom:8px}
 .drow{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
 .drow .dv{font-family:Space Grotesk,sans-serif;font-size:18px;font-weight:700}
 .fbar{display:grid;grid-template-columns:120px 1fr 36px;gap:6px;align-items:center;margin:3px 0;font-size:11px}
 .fn{text-align:right;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ft{height:10px;background:#EEF4F2;border-radius:5px;overflow:hidden}
+.ft{height:10px;background:#F0EEE8;border-radius:5px;overflow:hidden}
 .ft i{display:block;height:100%;border-radius:5px}
 .fp{font-weight:700;text-align:right}
 .attn{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
@@ -64,7 +64,7 @@ body{font-family:Inter,system-ui,sans-serif;background:#E8F2EF;color:var(--ink);
 .attn-item .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.03em}
 .attn-item .tag.crit{color:var(--crit)}.attn-item .tag.warn{color:var(--warn)}
 .attn-item .body{font-size:12px}
-.acao{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0;background:#F7FBFA}
+.acao{border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0;background:#F7F6F2}
 .ah{display:flex;justify-content:space-between;align-items:center;font-size:12px;margin-bottom:2px}
 .ad{font-size:11.5px;color:#333}
 .exec{font-size:12.5px}.exec li{margin:4px 0}
@@ -79,29 +79,29 @@ body{font-family:Inter,system-ui,sans-serif;background:#E8F2EF;color:var(--ink);
   html,body{background:#fff!important}
   .toolbar{display:none!important}
   .page{max-width:100%;margin:0;padding:0}
-  .card{box-shadow:none;border:1px solid #D5E8E3;border-radius:8px;padding:14px 16px;margin:0 0 10px;break-inside:avoid}
+  .card{box-shadow:none;border:1px solid #E0DDD4;border-radius:8px;padding:14px 16px;margin:0 0 10px;break-inside:avoid}
   .pb{page-break-before:always}
   .kpi{
-    background:linear-gradient(160deg,#0F4C52,#1E7F72)!important;
+    background:linear-gradient(160deg,#2D2D2D,#C4A35A)!important;
     color:#fff!important;
     border:none!important;
     -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important
   }
-  .kpi.ok{background:linear-gradient(160deg,#0F4C52,#1E7F72)!important}
+  .kpi.ok{background:linear-gradient(160deg,#2D2D2D,#C4A35A)!important}
   .kpi.warn{background:linear-gradient(160deg,#8A4A12,#B0500E)!important}
   .kpi.crit{background:linear-gradient(160deg,#8B2E28,#C6483E)!important}
-  .kpi.navy{background:linear-gradient(160deg,#0B3B3E,#0F4C52)!important}
+  .kpi.navy{background:linear-gradient(160deg,#1A1A1A,#2D2D2D)!important}
   .kpi.gold{background:linear-gradient(160deg,#8B6914,#C79A45)!important}
   .kpi .l,.kpi .s{color:rgba(255,255,255,.9)!important}
   .kpi .v{color:#fff!important}
   .h{
-    background:linear-gradient(90deg,#0B3B3E,#1E7F72)!important;
+    background:linear-gradient(90deg,#1A1A1A,#2D2D2D)!important;
     color:#fff!important;
     -webkit-print-color-adjust:exact!important;print-color-adjust:exact!important
   }
   .h::after{background:rgba(255,255,255,.25)!important}
-  .tbl th{background:#0B3B3E!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .pill-ok{background:#E4F5EE!important;color:#1E7F72!important}
+  .tbl th{background:#1A1A1A!important;color:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .pill-ok{background:#E4F5EE!important;color:#C4A35A!important}
   .pill-warn{background:#FFEADD!important;color:#B0500E!important}
   .pill-crit{background:#FBEAE8!important;color:#C6483E!important}
   .attn-item.crit{background:#FDF6F5!important;border-color:#F0C9C5!important}
@@ -194,11 +194,11 @@ body{font-family:Inter,system-ui,sans-serif;background:#E8F2EF;color:var(--ink);
   <div class="three">
     <div class="dcard">
       <h4>São Leopoldo RS</h4><div class="dm">Julho/2026</div>
-      <div class="drow"><span>Geral</span><span class="dv" style="color:#1E7F72">99%</span></div>
-      <div class="drow"><span>Mandatória</span><span class="dv" style="color:#1E7F72">100%</span></div>
+      <div class="drow"><span>Geral</span><span class="dv" style="color:#C4A35A">99%</span></div>
+      <div class="drow"><span>Mandatória</span><span class="dv" style="color:#C4A35A">100%</span></div>
     </div><div class="dcard">
       <h4>Itajaí SC</h4><div class="dm">Julho/2026</div>
-      <div class="drow"><span>Geral</span><span class="dv" style="color:#1E7F72">99%</span></div>
+      <div class="drow"><span>Geral</span><span class="dv" style="color:#C4A35A">99%</span></div>
       <div class="drow"><span>Mandatória</span><span class="dv" style="color:#C6483E">98%</span></div>
     </div><div class="dcard">
       <h4>Campo Grande MS</h4><div class="dm">Julho/2026</div>
@@ -230,7 +230,7 @@ body{font-family:Inter,system-ui,sans-serif;background:#E8F2EF;color:var(--ink);
     </div>
     <div>
       <div style="font-weight:700;font-size:12px;color:var(--navy);margin-bottom:6px">Mapeamento por área</div>
-      <div class="fbar"><span class="fn">Gestão de Frotas</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Almoxarifado</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Qualidade</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Meio Ambiente</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Compras</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Fiscal</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Rental</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Contábil</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">T.I</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Operacional</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Gestão de Avarias</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Suporte Técnico</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Financeiro</span><span class="ft"><i style="width:100%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">100%</span></div><div class="fbar"><span class="fn">Comercial</span><span class="ft"><i style="width:90%;background:#1E7F72"></i></span><span class="fp" style="color:#1E7F72">90%</span></div><div class="fbar"><span class="fn">Recursos Humanos</span><span class="ft"><i style="width:88%;background:#E07C3E"></i></span><span class="fp" style="color:#B0500E">88%</span></div><div class="fbar"><span class="fn">Segurança do Trabalho</span><span class="ft"><i style="width:26%;background:#C6483E"></i></span><span class="fp" style="color:#C6483E">26%</span></div><div class="fbar"><span class="fn">Pós Venda</span><span class="ft"><i style="width:21%;background:#C6483E"></i></span><span class="fp" style="color:#C6483E">21%</span></div>
+      <div class="fbar"><span class="fn">Gestão de Frotas</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Almoxarifado</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Qualidade</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Meio Ambiente</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Compras</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Fiscal</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Rental</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Contábil</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">T.I</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Operacional</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Gestão de Avarias</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Suporte Técnico</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Financeiro</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Comercial</span><span class="ft"><i style="width:90%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">90%</span></div><div class="fbar"><span class="fn">Recursos Humanos</span><span class="ft"><i style="width:88%;background:#E07C3E"></i></span><span class="fp" style="color:#B0500E">88%</span></div><div class="fbar"><span class="fn">Segurança do Trabalho</span><span class="ft"><i style="width:26%;background:#C6483E"></i></span><span class="fp" style="color:#C6483E">26%</span></div><div class="fbar"><span class="fn">Pós Venda</span><span class="ft"><i style="width:21%;background:#C6483E"></i></span><span class="fp" style="color:#C6483E">21%</span></div>
     </div>
   </div>
 </div>
