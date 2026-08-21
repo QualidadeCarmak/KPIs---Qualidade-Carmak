@@ -159,10 +159,22 @@ function hideNestedChrome(iframe){
   try{
     const doc = iframe.contentDocument || iframe.contentWindow.document;
     if(!doc) return;
+    // Esconde apenas marca/logo/chip da topbar interna; mantém as sub-abas (Dashboard, Lista Mestra, etc.)
     const style = doc.createElement('style');
     style.textContent = `
-      .topbar, .toolbar, .unified-topbar { display:none !important; }
-      body { padding-top: 0 !important; }
+      .topbar .brand,
+      .topbar .brand-mark,
+      .topbar .brand-text,
+      .topbar .brand-logo,
+      .topbar .brand-logo-top,
+      .topbar-right,
+      .toolbar { display: none !important; }
+      .topbar {
+        height: 52px !important;
+        padding: 0 16px !important;
+        justify-content: flex-start !important;
+      }
+      .topbar .tabs { margin-left: 0 !important; }
     `;
     doc.head.appendChild(style);
   }catch(e){}
