@@ -476,23 +476,21 @@ table.doc-table tbody tr:nth-child(even):hover{ background: var(--tint-2); }
    ========================================================= */
 
 
-<script>
 (function(){
   try{
     const raw = localStorage.getItem('carmak_qualidade_v1');
     if(!raw) return;
     const p = JSON.parse(raw);
-    if(p.docs && p.docs.length){
+    if(p.docs && Array.isArray(p.docs) && p.docs.length){
       const el = document.getElementById('doc-data');
       if(el) el.textContent = JSON.stringify(p.docs);
     }
-    if(p.fluxos && p.fluxos.length){
+    if(p.fluxos && Array.isArray(p.fluxos) && p.fluxos.length){
       const el = document.getElementById('fluxo-data');
       if(el) el.textContent = JSON.stringify(p.fluxos);
     }
   }catch(e){ console.warn('import override sgq', e); }
 })();
-</script>
 
 const DATA = JSON.parse(document.getElementById('doc-data').textContent);
 const FLUXOS = JSON.parse(document.getElementById('fluxo-data').textContent);

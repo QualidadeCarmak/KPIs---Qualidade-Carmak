@@ -411,7 +411,6 @@ table.doc-table tbody tr:nth-child(even):hover{ background: var(--tint-2); }
    ========================================================= */
 
 
-<script>
 (function(){
   try{
     const raw = localStorage.getItem('carmak_qualidade_v1');
@@ -421,8 +420,7 @@ table.doc-table tbody tr:nth-child(even):hover{ background: var(--tint-2); }
       const el = document.getElementById('asec-data');
       if(el){
         const cur = JSON.parse(el.textContent);
-        // merge auditorias, keep NC/assert if import empty
-        if(p.asec.auditorias.length) cur.auditorias = p.asec.auditorias;
+        cur.auditorias = p.asec.auditorias;
         if(p.asec.nc_matriz && p.asec.nc_matriz.length) cur.nc_matriz = p.asec.nc_matriz;
         if(p.asec.nc_itajai && p.asec.nc_itajai.length) cur.nc_itajai = p.asec.nc_itajai;
         if(p.asec.assertividade_matriz && p.asec.assertividade_matriz.length) cur.assertividade_matriz = p.asec.assertividade_matriz;
@@ -437,7 +435,6 @@ table.doc-table tbody tr:nth-child(even):hover{ background: var(--tint-2); }
     }
   }catch(e){ console.warn('import override asec', e); }
 })();
-</script>
 
 const ASEC = JSON.parse(document.getElementById('asec-data').textContent);
 const DEALER = JSON.parse(document.getElementById('dealer-data').textContent);
