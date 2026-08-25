@@ -603,21 +603,31 @@ function parseFluxos(wb){
   if(!name) return null;
   const rows = sheetRows(wb, name);
   if(!rows) return null;
-  const hi = findHeaderRow(rows, ['processo']);
+  // Cabeçalho real: "Área / Subárea | Processo Mapeado | Status | Observações"
+  // NÃO usar só "processo" — o título "Fluxograma de Processos" e a linha de
+  // instrução também contêm essa palavra e quebravam o parse (status vazio → 0%).
+  let hi = findHeaderRow(rows, ['processo mapeado', 'status']);
+  if(hi < 0) hi = findHeaderRow(rows, ['area / subarea', 'processo']);
+  if(hi < 0) hi = findHeaderRow(rows, ['area', 'processo', 'status']);
   if(hi < 0) return null;
   const header = rows[hi] || [];
   const iArea = colIndex(header, ['área / subárea', 'area / subarea', 'área', 'area']);
   const iProc = colIndex(header, ['processo mapeado', 'processo']);
   const iStat = colIndex(header, ['status']);
   const iObs = colIndex(header, ['observações', 'observacoes', 'obs']);
+  // Se colunas críticas não foram encontradas, cabeçalho ainda está errado
+  if(iArea < 0 || iProc < 0 || iStat < 0) return null;
   const out = [];
   for(let i = hi + 1; i < rows.length; i++){
     const r = rows[i];
     if(!r || (iArea >= 0 && (r[iArea] == null || r[iArea] === ''))) continue;
+    const area = String(r[iArea] || '').trim();
+    // ignora linha de cabeçalho repetida se houver
+    if(norm(area) === 'area / subarea' || norm(area) === 'area') continue;
     out.push({
-      area: iArea >= 0 ? String(r[iArea]) : '',
-      processo: iProc >= 0 && r[iProc] != null ? String(r[iProc]) : '',
-      status: iStat >= 0 && r[iStat] != null ? String(r[iStat]) : '',
+      area: area,
+      processo: iProc >= 0 && r[iProc] != null ? String(r[iProc]).trim() : '',
+      status: iStat >= 0 && r[iStat] != null ? String(r[iStat]).trim() : '',
       obs: iObs >= 0 && r[iObs] != null ? String(r[iObs]) : ''
     });
   }
