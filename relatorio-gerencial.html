@@ -185,7 +185,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
   </div>
 
   <div class="h">Painel de status YTD</div>
-  <div class="kpis">
+  <div class="kpis" id="rg-kpis-exec">
     <div class="kpi ok"><div class="l">Auditorias ASEC</div><div class="v">95%</div><div class="s">57/60 realizadas</div></div>
     <div class="kpi crit"><div class="l">Dealer · Campo Grande</div><div class="v">45%</div><div class="s">mandatória 0%</div></div>
     <div class="kpi warn"><div class="l">Docs em dia</div><div class="v">69%</div><div class="s">43 vencidos · 13 em 30d</div></div>
@@ -193,14 +193,14 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
   </div>
 
   <div class="h">Sumário executivo</div>
-  <ul class="exec">
+  <ul class="exec" id="rg-sumario">
     <li><b>ASEC:</b> 95% do plano YTD (57 de 60, até Junho) · 79 NC e 115 sugestões · SL 99% / Itajaí 99% / CG 45%</li>
     <li><b>SGQ:</b> 259 docs ativos · 69% em dia · 43 vencidos · mapeamento 88% (críticos: Pós Venda 21%, Segurança do Trabalho 26%)</li>
     <li><b>Treinamentos:</b> 68 técnicos · progresso médio 26% · 18 com apto · 7 trilha completa · 17 só inscritos</li>
   </ul>
 
   <div class="h">Pontos de atenção</div>
-  <div class="attn">
+  <div class="attn" id="rg-attn">
     <div class="attn-item crit"><div><div class="tag crit">Crítico</div><div class="body"><b>Campo Grande</b> — geral 45% · mandatória 0%</div></div></div>
     <div class="attn-item warn"><div><div class="tag warn">Atenção</div><div class="body"><b>Documentos</b> — 43 vencidos · 13 vencem em 30 dias</div></div></div>
     <div class="attn-item warn"><div><div class="tag warn">Atenção</div><div class="body"><b>Fluxogramas</b> — Pós Venda (21%), Segurança do Trabalho (26%)</div></div></div>
@@ -211,7 +211,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
 <!-- ===== PÁGINA 2: ASEC COMPLETO ===== -->
 <div class="card pb">
   <div class="h">ASEC Toyota — visão consolidada</div>
-  <div class="kpis">
+  <div class="kpis" id="rg-kpis-asec">
     <div class="kpi"><div class="l">Realizadas YTD</div><div class="v">57</div><div class="s">de 60 planejadas</div></div>
     <div class="kpi ok"><div class="l">Cumprimento</div><div class="v">95%</div><div class="s">até Junho</div></div>
     <div class="kpi"><div class="l">Não conformidades</div><div class="v">79</div><div class="s">Matriz 57 · Itajaí 22</div></div>
@@ -256,7 +256,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
 <!-- ===== PÁGINA 3: SGQ ===== -->
 <div class="card pb">
   <div class="h">SGQ — documentos e mapeamento de processos</div>
-  <div class="kpis">
+  <div class="kpis" id="rg-kpis-sgq">
     <div class="kpi"><div class="l">Lista mestra</div><div class="v">273</div><div class="s">259 ativos</div></div>
     <div class="kpi warn"><div class="l">Em dia</div><div class="v">69%</div><div class="s">179 documentos</div></div>
     <div class="kpi crit"><div class="l">Vencidos</div><div class="v">43</div><div class="s">13 em 30 dias · 24 em 90d</div></div>
@@ -265,6 +265,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
   <div class="two">
     <div>
       <div style="font-weight:700;font-size:12px;color:var(--navy);margin-bottom:6px">Status documental (ativos)</div>
+      <div id="rg-doc-status">
       <table class="tbl"><thead><tr><th>Status</th><th>Qtd</th><th>%</th></tr></thead>
       <tbody>
         <tr><td>Em dia</td><td>179</td><td>69%</td></tr>
@@ -272,10 +273,13 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
         <tr><td>Vence em 30 dias</td><td>13</td><td>5%</td></tr>
         <tr><td>Vencido</td><td>43</td><td>17%</td></tr>
       </tbody></table>
+      </div><!-- /rg-doc-status -->
     </div>
     <div>
       <div style="font-weight:700;font-size:12px;color:var(--navy);margin-bottom:6px">Mapeamento por área</div>
+      <div id="rg-fluxo-bars">
       <div class="fbar"><span class="fn">Gestão de Frotas</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Almoxarifado</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Qualidade</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Meio Ambiente</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Compras</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Fiscal</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Rental</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Contábil</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">T.I</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Operacional</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Gestão de Avarias</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Suporte Técnico</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Financeiro</span><span class="ft"><i style="width:100%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">100%</span></div><div class="fbar"><span class="fn">Comercial</span><span class="ft"><i style="width:90%;background:#C4A35A"></i></span><span class="fp" style="color:#C4A35A">90%</span></div><div class="fbar"><span class="fn">Recursos Humanos</span><span class="ft"><i style="width:88%;background:#E07C3E"></i></span><span class="fp" style="color:#B0500E">88%</span></div><div class="fbar"><span class="fn">Segurança do Trabalho</span><span class="ft"><i style="width:26%;background:#C6483E"></i></span><span class="fp" style="color:#C6483E">26%</span></div><div class="fbar"><span class="fn">Pós Venda</span><span class="ft"><i style="width:21%;background:#C6483E"></i></span><span class="fp" style="color:#C6483E">21%</span></div>
+      </div><!-- /rg-fluxo-bars -->
     </div>
   </div>
 </div>
@@ -283,7 +287,7 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
 <!-- ===== PÁGINA 4: TREINAMENTOS + AÇÕES ===== -->
 <div class="card pb">
   <div class="h">Treinamentos técnicos TO/BT</div>
-  <div class="kpis">
+  <div class="kpis" id="rg-kpis-trein">
     <div class="kpi"><div class="l">Técnicos</div><div class="v">68</div><div class="s">na base</div></div>
     <div class="kpi"><div class="l">Progresso médio</div><div class="v">26%</div><div class="s">módulos concluídos</div></div>
     <div class="kpi"><div class="l">Com apto</div><div class="v">18</div><div class="s">≥1 módulo</div></div>
@@ -292,15 +296,334 @@ body{font-family:Inter,system-ui,sans-serif;background:var(--page,#F0EFEA);color
   <div style="margin-bottom:10px"><div class="chip"><span class="chip-n">RS</span><span class="chip-v">128</span></div><div class="chip"><span class="chip-n">SC</span><span class="chip-v">52</span></div><div class="chip"><span class="chip-n">PR</span><span class="chip-v">12</span></div><div class="chip"><span class="chip-n">SP</span><span class="chip-v">2</span></div><div class="chip"><span class="chip-n">ES</span><span class="chip-v">2</span></div><div class="chip"><span class="chip-n">RJ</span><span class="chip-v">0</span></div></div>
 
   <div class="h">Ações e projetos do período</div>
+  <div id="rg-acoes">
   <div class="acao"><div class="ah"><b>Ação</b> · Auditoria ASEC Presencial – Matriz RS e Filial Itajaí/SC<span class="pill pill-ok">Concluído</span></div><div class="ad">Realizadas auditorias presenciais na Matriz e na filial de Itajaí/SC para verificação do atendimento aos requisitos ASEC. Na filial, também foi iniciado o desenvolvimento dos Mapas de Fuga.</div></div><div class="acao"><div class="ah"><b>Ação</b> · Adequação da Unidade FEMSA – Porto Alegre/RS<span class="pill pill-ok">Concluído</span></div><div class="ad">Concluída a adequação da unidade aos requisitos estabelecidos. A próxima etapa será a realização de uma auditoria presencial para validação das melhorias.</div></div><div class="acao"><div class="ah"><b>Projeto</b> · Desenvolvimento do EAD – Tractian<span class="pill pill-warn">Em andamento</span></div><div class="ad">Iniciado o desenvolvimento do curso para Planejadores de Manutenção, visando padronizar processos com impacto direto na qualidade do atendimento ao cliente.</div></div><div class="acao"><div class="ah"><b>Projeto</b> · Prêmio de Qualidade do Vale dos Sinos<span class="pill pill-warn">Em andamento</span></div><div class="ad">Realizada a inscrição da Carmak no prêmio promovido pela ACI NH, com início da elaboração do relatório utilizando como case a implantação da plataforma EAD.</div></div><div class="acao"><div class="ah"><b>Projeto</b> · Implantação do TLLP Toyota<span class="pill pill-warn">Em andamento</span></div><div class="ad">Iniciada a implementação do TLLP Toyota, ferramenta que padroniza o roteiro de visitação e apresentação da empresa aos visitantes.</div></div>
 
-  <div class="foot">
+  </div><!-- /rg-acoes -->
+  <div class="foot" id="rg-foot">
     Fonte: KPIs_Qualidade_Carmak_Base.xlsx · Luan Mota — Analista de Qualidade Júnior · YTD 2026 · referência até Julho<br>
     Uso interno · não substitui evidências do SGQ/ASEC
   </div>
 </div>
 
 </div>
+
+<script>
+/* Hidratação do relatório a partir dos dados importados (localStorage) */
+(function(){
+  const LS_KEY = 'carmak_qualidade_v1';
+  function esc(s){
+    return String(s==null?'':s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+  function pct(n){ return Math.round(n); }
+  function kpiClass(kind){
+    if(kind==='ok') return 'kpi ok';
+    if(kind==='warn') return 'kpi warn';
+    if(kind==='crit') return 'kpi crit';
+    return 'kpi';
+  }
+  function barColor(p){
+    if(p>=90) return '#C4A35A';
+    if(p>=70) return '#E07C3E';
+    return '#C6483E';
+  }
+  function pillClass(st){
+    const t = (st||'').toLowerCase();
+    if(t.includes('conclu')) return 'pill-ok';
+    if(t.includes('andamento')) return 'pill-warn';
+    if(t.includes('atras') || t.includes('crít') || t.includes('crit')) return 'pill-crit';
+    return 'pill-off';
+  }
+
+  function compute(p){
+    const out = {};
+    // ---- Docs / SGQ ----
+    const docs = Array.isArray(p.docs) ? p.docs : [];
+    const ativos = docs.filter(d => (d.situacao||'Ativo') === 'Ativo');
+    const byStatus = {};
+    ativos.forEach(d => {
+      const s = d.status || 'Em dia';
+      byStatus[s] = (byStatus[s]||0) + 1;
+    });
+    const emDia = byStatus['Em dia'] || 0;
+    const v90 = byStatus['Vence em 90 dias'] || 0;
+    const v30 = byStatus['Vence em 30 dias'] || 0;
+    const venc = byStatus['Vencido'] || 0;
+    const nAtivos = ativos.length || 1;
+    out.docs = {
+      total: docs.length,
+      ativos: ativos.length,
+      emDia, v90, v30, venc,
+      pctEmDia: pct(100*emDia/nAtivos),
+      byStatus
+    };
+
+    // ---- Fluxos ----
+    const fluxos = Array.isArray(p.fluxos) ? p.fluxos : [];
+    const fin = fluxos.filter(f => f.status === 'Finalizado').length;
+    const totalF = fluxos.length || 1;
+    const byArea = {};
+    fluxos.forEach(f => {
+      const a = f.area || '—';
+      if(!byArea[a]) byArea[a] = {total:0, fin:0};
+      byArea[a].total++;
+      if(f.status === 'Finalizado') byArea[a].fin++;
+    });
+    const areaRows = Object.entries(byArea).map(([area,v])=>({
+      area, total:v.total, fin:v.fin, pct: pct(100*v.fin/(v.total||1))
+    })).sort((a,b)=> b.pct - a.pct || a.area.localeCompare(b.area,'pt-BR'));
+    const critAreas = areaRows.filter(r => r.pct < 70).sort((a,b)=> a.pct-b.pct);
+    out.fluxos = {
+      total: fluxos.length,
+      fin,
+      pct: pct(100*fin/totalF),
+      areaRows,
+      critAreas
+    };
+
+    // ---- Treinamentos ----
+    const trein = p.treinamentos || null;
+    if(trein && Array.isArray(trein.people)){
+      const people = trein.people;
+      const n = people.length;
+      let sumPct = 0, aptos = 0, inscritos = 0, trilha = 0;
+      const mods = trein.modules || Object.keys((people[0]&&people[0].mods)||{});
+      people.forEach(pe => {
+        const pc = pe.pct != null ? pe.pct : 0;
+        sumPct += pc;
+        if((pe.n_apto||0) > 0) aptos++;
+        if((pe.n_inscrito||0) > 0 && (pe.n_concluido||0) === 0) inscritos++;
+        if(mods.length && pe.n_concluido === mods.length) trilha++;
+        // fallback: all modules concluido
+        if(!mods.length && pe.mods){
+          const vals = Object.values(pe.mods);
+          if(vals.length && vals.every(v => v === 'concluido')) trilha++;
+        }
+      });
+      // region chips - modules counts were wrong in static (128 etc) — use people by UF
+      const byUF = {};
+      people.forEach(pe => {
+        const reg = (pe.regiao||'').toString();
+        const m = reg.match(/\b([A-Z]{2})\b/);
+        const uf = m ? m[1] : (reg.split(',').pop()||'').trim().toUpperCase().slice(0,2) || '—';
+        byUF[uf] = (byUF[uf]||0)+1;
+      });
+      out.trein = {
+        n,
+        prog: n ? pct(sumPct/n) : 0,
+        aptos,
+        inscritos,
+        trilha,
+        byUF
+      };
+    }
+
+    // ---- ASEC ----
+    const asec = p.asec || null;
+    if(asec){
+      const aud = asec.auditorias || [];
+      let real = 0, plan = 0;
+      aud.forEach(a => {
+        if(a.v1 != null) real += Number(a.v1)||0;
+        if(a.v2 != null) plan += Number(a.v2)||0;
+      });
+      const ncM = (asec.nc_matriz||[]).reduce((s,x)=> s + (x.v1!=null?Number(x.v1):0), 0);
+      const sugM = (asec.nc_matriz||[]).reduce((s,x)=> s + (x.v2!=null?Number(x.v2):0), 0);
+      const ncI = (asec.nc_itajai||[]).reduce((s,x)=> s + (x.v1!=null?Number(x.v1):0), 0);
+      const sugI = (asec.nc_itajai||[]).reduce((s,x)=> s + (x.v2!=null?Number(x.v2):0), 0);
+      out.asec = {
+        real, plan,
+        pct: plan ? pct(100*real/plan) : 0,
+        nc: ncM+ncI, sug: sugM+sugI,
+        ncM, sugM, ncI, sugI
+      };
+    }
+
+    // ---- Dealer ----
+    const dealer = Array.isArray(p.dealer) ? p.dealer : [];
+    if(dealer.length){
+      const byD = {};
+      dealer.forEach(r => {
+        if(!r.dealer) return;
+        if(r.geral == null && r.mandatoria == null) return;
+        if(!byD[r.dealer] || (r.mes_num||0) > (byD[r.dealer].mes_num||0)){
+          byD[r.dealer] = r;
+        }
+      });
+      out.dealers = Object.values(byD);
+      const cg = out.dealers.find(d => /campo\s*grande/i.test(d.dealer));
+      out.cg = cg || null;
+    }
+
+    out.acoes = Array.isArray(p.acoes) ? p.acoes : null;
+    out.meta = {
+      fileName: p.fileName || '',
+      importedAt: p.importedAt || ''
+    };
+    return out;
+  }
+
+  function render(data){
+    const d = data;
+    // --- Page 1 KPIs ---
+    const elExec = document.getElementById('rg-kpis-exec');
+    if(elExec){
+      const audPct = d.asec ? d.asec.pct : null;
+      const audSub = d.asec ? (d.asec.real + '/' + d.asec.plan + ' realizadas') : '';
+      const cgG = d.cg && d.cg.geral != null ? pct(100*Number(d.cg.geral)) : null;
+      const cgM = d.cg && d.cg.mandatoria != null ? pct(100*Number(d.cg.mandatoria)) : null;
+      const docsWarn = d.docs.venc >= 1;
+      const fluxWarn = d.fluxos.pct < 90;
+      elExec.innerHTML = `
+        <div class="${kpiClass(audPct!=null && audPct>=90 ? 'ok' : 'warn')}"><div class="l">Auditorias ASEC</div><div class="v">${audPct!=null?audPct+'%':'—'}</div><div class="s">${esc(audSub)}</div></div>
+        <div class="${kpiClass(cgG!=null && cgG<70 ? 'crit' : (cgG!=null && cgG<90 ? 'warn' : 'ok'))}"><div class="l">Dealer · Campo Grande</div><div class="v">${cgG!=null?cgG+'%':'—'}</div><div class="s">mandatória ${cgM!=null?cgM+'%':'—'}</div></div>
+        <div class="${kpiClass(docsWarn?'warn':'ok')}"><div class="l">Docs em dia</div><div class="v">${d.docs.pctEmDia}%</div><div class="s">${d.docs.venc} vencidos · ${d.docs.v30} em 30d</div></div>
+        <div class="${kpiClass(fluxWarn?'warn':'ok')}"><div class="l">Fluxogramas</div><div class="v">${d.fluxos.pct}%</div><div class="s">${d.fluxos.fin}/${d.fluxos.total} finalizados</div></div>
+      `;
+    }
+
+    const elSum = document.getElementById('rg-sumario');
+    if(elSum){
+      const asecLine = d.asec
+        ? `<li><b>ASEC:</b> ${d.asec.pct}% do plano YTD (${d.asec.real} de ${d.asec.plan}) · ${d.asec.nc} NC e ${d.asec.sug} sugestões`
+          + (d.dealers ? ' · ' + d.dealers.map(x => {
+              const short = (x.dealer||'').replace(/^Carmak\s*-\s*/i,'').trim();
+              const g = x.geral!=null ? pct(100*Number(x.geral))+'%' : '—';
+              return short + ' ' + g;
+            }).join(' / ') : '')
+          + `</li>`
+        : '';
+      const critTxt = d.fluxos.critAreas.length
+        ? d.fluxos.critAreas.map(r => r.area + ' ' + r.pct + '%').join(', ')
+        : 'nenhuma área crítica';
+      const treinLine = d.trein
+        ? `<li><b>Treinamentos:</b> ${d.trein.n} técnicos · progresso médio ${d.trein.prog}% · ${d.trein.aptos} com apto · ${d.trein.trilha} trilha completa · ${d.trein.inscritos} só inscritos</li>`
+        : '';
+      elSum.innerHTML = `
+        ${asecLine}
+        <li><b>SGQ:</b> ${d.docs.ativos} docs ativos · ${d.docs.pctEmDia}% em dia · ${d.docs.venc} vencidos · mapeamento ${d.fluxos.pct}% (críticos: ${esc(critTxt)})</li>
+        ${treinLine}
+      `;
+    }
+
+    const elAttn = document.getElementById('rg-attn');
+    if(elAttn){
+      const items = [];
+      if(d.cg && d.cg.geral != null && Number(d.cg.geral) < 0.7){
+        items.push(`<div class="attn-item crit"><div><div class="tag crit">Crítico</div><div class="body"><b>Campo Grande</b> — geral ${pct(100*Number(d.cg.geral))}% · mandatória ${d.cg.mandatoria!=null?pct(100*Number(d.cg.mandatoria))+'%':'—'}</div></div></div>`);
+      }
+      if(d.docs.venc > 0){
+        items.push(`<div class="attn-item warn"><div><div class="tag warn">Atenção</div><div class="body"><b>Documentos</b> — ${d.docs.venc} vencidos · ${d.docs.v30} vencem em 30 dias</div></div></div>`);
+      }
+      if(d.fluxos.critAreas.length){
+        items.push(`<div class="attn-item warn"><div><div class="tag warn">Atenção</div><div class="body"><b>Fluxogramas</b> — ${esc(d.fluxos.critAreas.map(r=>r.area+' ('+r.pct+'%)').join(', '))}</div></div></div>`);
+      }
+      if(d.trein && d.trein.prog < 40){
+        items.push(`<div class="attn-item warn"><div><div class="tag warn">Monitorar</div><div class="body"><b>Treinamentos</b> — progresso médio ${d.trein.prog}% · ${d.trein.inscritos} só inscritos</div></div></div>`);
+      }
+      if(items.length) elAttn.innerHTML = items.join('');
+    }
+
+    // --- ASEC KPIs ---
+    const elAsec = document.getElementById('rg-kpis-asec');
+    if(elAsec && d.asec){
+      elAsec.innerHTML = `
+        <div class="kpi"><div class="l">Realizadas YTD</div><div class="v">${d.asec.real}</div><div class="s">de ${d.asec.plan} planejadas</div></div>
+        <div class="${kpiClass(d.asec.pct>=90?'ok':'warn')}"><div class="l">Cumprimento</div><div class="v">${d.asec.pct}%</div><div class="s">plano de auditorias</div></div>
+        <div class="kpi"><div class="l">Não conformidades</div><div class="v">${d.asec.nc}</div><div class="s">Matriz ${d.asec.ncM} · Itajaí ${d.asec.ncI}</div></div>
+        <div class="kpi"><div class="l">Sugestões</div><div class="v">${d.asec.sug}</div><div class="s">Matriz ${d.asec.sugM} · Itajaí ${d.asec.sugI}</div></div>
+      `;
+    }
+
+    // --- SGQ KPIs ---
+    const elSgq = document.getElementById('rg-kpis-sgq');
+    if(elSgq){
+      elSgq.innerHTML = `
+        <div class="kpi"><div class="l">Lista mestra</div><div class="v">${d.docs.total}</div><div class="s">${d.docs.ativos} ativos</div></div>
+        <div class="${kpiClass(d.docs.pctEmDia>=80?'ok':'warn')}"><div class="l">Em dia</div><div class="v">${d.docs.pctEmDia}%</div><div class="s">${d.docs.emDia} documentos</div></div>
+        <div class="${kpiClass(d.docs.venc>0?'warn':'ok')}"><div class="l">Vencidos</div><div class="v">${d.docs.venc}</div><div class="s">${d.docs.v30} em 30 dias · ${d.docs.v90} em 90d</div></div>
+        <div class="${kpiClass(d.fluxos.pct>=90?'ok':'warn')}"><div class="l">Fluxogramas</div><div class="v">${d.fluxos.pct}%</div><div class="s">${d.fluxos.fin}/${d.fluxos.total} finalizados</div></div>
+      `;
+    }
+
+    const elDocSt = document.getElementById('rg-doc-status');
+    if(elDocSt){
+      const n = d.docs.ativos || 1;
+      const rows = [
+        ['Em dia', d.docs.emDia],
+        ['Vence em 90 dias', d.docs.v90],
+        ['Vence em 30 dias', d.docs.v30],
+        ['Vencido', d.docs.venc]
+      ];
+      elDocSt.innerHTML = `<table class="tbl"><thead><tr><th>Status</th><th>Qtd</th><th>%</th></tr></thead><tbody>` +
+        rows.map(([lab,q]) => `<tr><td>${lab}</td><td>${q}</td><td>${pct(100*q/n)}%</td></tr>`).join('') +
+        `</tbody></table>`;
+    }
+
+    const elBars = document.getElementById('rg-fluxo-bars');
+    if(elBars && d.fluxos.areaRows.length){
+      elBars.innerHTML = d.fluxos.areaRows.map(r => {
+        const col = barColor(r.pct);
+        return `<div class="fbar"><span class="fn">${esc(r.area)}</span><span class="ft"><i style="width:${r.pct}%;background:${col}"></i></span><span class="fp" style="color:${col}">${r.pct}%</span></div>`;
+      }).join('');
+    }
+
+    // --- Treinamentos ---
+    const elTre = document.getElementById('rg-kpis-trein');
+    if(elTre && d.trein){
+      elTre.innerHTML = `
+        <div class="kpi"><div class="l">Técnicos</div><div class="v">${d.trein.n}</div><div class="s">na base</div></div>
+        <div class="kpi"><div class="l">Progresso médio</div><div class="v">${d.trein.prog}%</div><div class="s">módulos concluídos</div></div>
+        <div class="kpi"><div class="l">Com apto</div><div class="v">${d.trein.aptos}</div><div class="s">≥1 módulo</div></div>
+        <div class="kpi"><div class="l">Trilha completa</div><div class="v">${d.trein.trilha}</div><div class="s">${d.trein.inscritos} só inscritos</div></div>
+      `;
+      // region chips right after kpis - find next sibling style chips
+      const chipsWrap = elTre.nextElementSibling;
+      if(chipsWrap && chipsWrap.querySelector && chipsWrap.querySelector('.chip')){
+        const order = ['RS','SC','PR','SP','ES','RJ'];
+        const ufs = Object.keys(d.trein.byUF);
+        const all = [...new Set([...order, ...ufs])];
+        chipsWrap.innerHTML = all.filter(u => d.trein.byUF[u] != null || order.includes(u)).map(u => {
+          const v = d.trein.byUF[u] || 0;
+          return `<div class="chip"><span class="chip-n">${esc(u)}</span><span class="chip-v">${v}</span></div>`;
+        }).join('');
+      }
+    }
+
+    // --- Ações ---
+    const elAc = document.getElementById('rg-acoes');
+    if(elAc && d.acoes && d.acoes.length){
+      elAc.innerHTML = d.acoes.map(a => {
+        const tipo = a.tipo || 'Ação';
+        const st = a.status || '';
+        return `<div class="acao"><div class="ah"><b>${esc(tipo)}</b> · ${esc(a.titulo)}<span class="pill ${pillClass(st)}">${esc(st)}</span></div><div class="ad">${esc(a.descricao)}</div></div>`;
+      }).join('');
+    }
+
+    // --- Foot ---
+    const elFoot = document.getElementById('rg-foot');
+    if(elFoot && d.meta.importedAt){
+      const when = new Date(d.meta.importedAt).toLocaleString('pt-BR');
+      elFoot.innerHTML = `Fonte: ${esc(d.meta.fileName || 'planilha importada')} · atualizado em ${esc(when)} · Luan Mota — Analista de Qualidade Júnior<br>Uso interno · não substitui evidências do SGQ/ASEC · dados via importação no navegador`;
+    }
+  }
+
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return;
+    const p = JSON.parse(raw);
+    if(!p || (!p.docs && !p.fluxos && !p.treinamentos && !p.asec)) return;
+    const data = compute(p);
+    render(data);
+    console.info('[relatorio] hidratado a partir da importação', data.meta);
+  }catch(e){
+    console.warn('[relatorio] falha ao hidratar', e);
+  }
+})();
+</script>
+
 <script>
 
 (function(){

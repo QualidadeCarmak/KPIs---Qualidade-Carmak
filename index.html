@@ -848,6 +848,49 @@ function parseCronograma(wb){
   return cron.length ? {cron, months} : null;
 }
 
+
+function parseAcoes(wb){
+  const name = findSheet(wb, [
+    n => norm(n).includes('acoes do mes') || norm(n).includes('ações do mês'),
+    n => norm(n).includes('acoes') || norm(n).includes('ações'),
+    '09 '
+  ]);
+  if(!name) return null;
+  const rows = sheetRows(wb, name);
+  if(!rows) return null;
+  // prefer row with mes + titulo
+  let headerIdx = -1;
+  for(let i = 0; i < Math.min(rows.length, 15); i++){
+    const cells = (rows[i] || []).map(c => norm(c));
+    if(cells.some(x => x === 'mes' || x === 'mês') && cells.some(x => x.includes('titulo') || x.includes('título'))){
+      headerIdx = i; break;
+    }
+  }
+  if(headerIdx < 0) headerIdx = findHeaderRow(rows, ['titulo', 'status']);
+  if(headerIdx < 0) headerIdx = findHeaderRow(rows, ['titulo']);
+  if(headerIdx < 0) return null;
+  const header = rows[headerIdx] || [];
+  const iMes = colIndex(header, ['mês', 'mes']);
+  const iTit = colIndex(header, ['título', 'titulo']);
+  const iDesc = colIndex(header, ['descrição', 'descricao', 'descriçao']);
+  const iTipo = colIndex(header, ['tipo']);
+  const iStat = colIndex(header, ['status']);
+  if(iTit < 0) return null;
+  const out = [];
+  for(let i = headerIdx + 1; i < rows.length; i++){
+    const r = rows[i];
+    if(!r || r[iTit] == null || r[iTit] === '') continue;
+    out.push({
+      mes: iMes >= 0 && r[iMes] != null ? String(r[iMes]).trim() : '',
+      titulo: String(r[iTit]).trim(),
+      descricao: iDesc >= 0 && r[iDesc] != null ? String(r[iDesc]).trim() : '',
+      tipo: iTipo >= 0 && r[iTipo] != null ? String(r[iTipo]).trim() : 'Ação',
+      status: iStat >= 0 && r[iStat] != null ? String(r[iStat]).trim() : ''
+    });
+  }
+  return out.length ? out : null;
+}
+
 async function handleImportFile(file){
   if(!file) return;
   if(typeof XLSX === 'undefined'){
@@ -874,7 +917,8 @@ async function handleImportFile(file){
       docs: parseSGQ(wb),
       fluxos: parseFluxos(wb),
       asec: asecPack,
-      dealer: parseDealer(wb)
+      dealer: parseDealer(wb),
+      acoes: parseAcoes(wb)
     };
     const parts = [];
     if(payload.treinamentos) parts.push(payload.treinamentos.people.length + ' técnicos');
@@ -888,6 +932,7 @@ async function handleImportFile(file){
       if((a.assertividade_matriz||[]).length) parts.push('Assert.');
     }
     if(payload.treinamentos && payload.treinamentos.cron && payload.treinamentos.cron.length) parts.push('cronograma');
+    if(payload.acoes && payload.acoes.length) parts.push(payload.acoes.length + ' ações');
     if(!parts.length){
       setStatus('Não reconheci os dados. Abas no arquivo: ' + sheets.join(' | '), 'err');
       console.log('Import debug', {sheets, payload});
@@ -895,8 +940,13 @@ async function handleImportFile(file){
     }
     localStorage.setItem(LS_KEY, JSON.stringify(payload));
     setStatus('Importado · ' + parts.join(' · ') + ' · reabra o módulo', 'ok');
-    if(typeof current !== 'undefined' && current && frames[current]){
-      try { frames[current].contentWindow.location.reload(); } catch(e){}
+    // Recarrega todos os módulos abertos/carregados para aplicar dados importados
+    if(typeof frames !== 'undefined'){
+      Object.values(frames).forEach(fr => {
+        try {
+          if(fr && fr.getAttribute('src')) fr.contentWindow.location.reload();
+        } catch(e){}
+      });
     }
   }catch(err){
     console.error(err);
@@ -907,8 +957,10 @@ async function handleImportFile(file){
 function clearSaved(){
   localStorage.removeItem(LS_KEY);
   setStatus('Dados salvos removidos. Usando base embutida.', 'ok');
-  if(typeof current !== 'undefined' && current && frames[current]){
-    try { frames[current].contentWindow.location.reload(); } catch(e){}
+  if(typeof frames !== 'undefined'){
+    Object.values(frames).forEach(fr => {
+      try { if(fr && fr.getAttribute('src')) fr.contentWindow.location.reload(); } catch(e){}
+    });
   }
 }
 
