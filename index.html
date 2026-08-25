@@ -310,6 +310,49 @@ function statusFromDays(dias, situacao){
   if(dias <= 90) return 'Vence em 90 dias';
   return 'Em dia';
 }
+/** True if cell looks like an Excel formula (not a usable value). */
+function isFormula(v){
+  if(v == null) return false;
+  if(typeof v === 'string' && v.trim().startsWith('=')) return true;
+  return false;
+}
+/** Usable cell value: null if empty or formula. */
+function cellVal(v){
+  if(v == null || v === '') return null;
+  if(isFormula(v)) return null;
+  return v;
+}
+/** Add months to ISO date YYYY-MM-DD. */
+function addMonthsISO(iso, months){
+  if(!iso || months == null || months === '') return null;
+  const n = Number(months);
+  if(Number.isNaN(n)) return null;
+  const parts = String(iso).split('-').map(Number);
+  if(parts.length < 3) return null;
+  let y = parts[0], m = parts[1] - 1 + n, d = parts[2];
+  y += Math.floor(m / 12);
+  m = ((m % 12) + 12) % 12;
+  const dim = [31, (y%4===0 && (y%100!==0 || y%400===0)) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][m];
+  d = Math.min(d, dim);
+  return y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+}
+/** Canonical short labels for training modules (must match dashboard chips). */
+function shortModLabel(m){
+  const s = String(m || '');
+  if(/STEP\s*1\s*TO\/BT\s*M[oó]dulo\s*1/i.test(s)) return 'S1-M1';
+  if(/STEP\s*1\s*TO\/BT\s*M[oó]dulo\s*2/i.test(s)) return 'S1-M2';
+  if(/STEP\s*1\s*TO\/BT\s*M[oó]dulo\s*3/i.test(s)) return 'S1-M3';
+  if(/STEP\s*2\s*TO\s*M[oó]dulo\s*1/i.test(s)) return 'S2-M1';
+  if(/STEP\s*2\s*TO\s*M[oó]dulo\s*2/i.test(s)) return 'S2-M2';
+  if(/STEP\s*2\s*TO\s*M[oó]dulo\s*3/i.test(s)) return 'S2-M3';
+  if(/STEP\s*3\s*TO\s*M[oó]dulo\s*1/i.test(s)) return 'S3-M1';
+  if(/STEP\s*3\s*TO\s*M[oó]dulo\s*2/i.test(s)) return 'S3-M2';
+  if(/STEP\s*3\s*TO\s*M[oó]dulo\s*3/i.test(s)) return 'S3-M3';
+  if(/STEP\s*1\s*BT/i.test(s)) return 'BT1';
+  if(/STEP\s*2\s*BT/i.test(s)) return 'BT2';
+  return s.replace(/STEP /i,'S').replace(/ TO\/BT/i,'').replace(/ M[oó]dulo /i,'-M')
+    .replace(/ TO /i,'T').replace(/ BT/i,'BT').slice(0, 10);
+}
 function norm(s){
   return String(s == null ? '' : s)
     .toLowerCase()
@@ -319,7 +362,9 @@ function norm(s){
 function sheetRows(wb, name){
   const ws = wb.Sheets[name];
   if(!ws) return null;
-  return XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true});
+  // raw:true keeps numbers/dates; formulas without cache come as undefined (not the formula text)
+  // Prefer cell value; if only formula string exists, leave null so parsers recalculate.
+  return XLSX.utils.sheet_to_json(ws, {header:1, defval:null, raw:true, cellDates:true});
 }
 function findSheet(wb, predicates){
   // predicates: array of functions (name) => bool, tried in order; or string includes
@@ -377,10 +422,7 @@ function parseTreinamentos(wb){
   const header = (rows[hi] || []).map(c => c == null ? '' : String(c).trim());
   const modules = header.slice(2).filter(Boolean);
   const short = {};
-  modules.forEach(m => {
-    short[m] = m.replace(/STEP /i,'S').replace(/ TO\/BT/i,'').replace(/ M[oó]dulo /i,'M')
-      .replace(/ TO /i,'T').replace(/ BT/i,'BT').slice(0, 10);
-  });
+  modules.forEach(m => { short[m] = shortModLabel(m); });
   const people = [];
   for(let i = hi + 1; i < rows.length; i++){
     const r = rows[i];
@@ -434,8 +476,9 @@ function parseSGQ(wb){
   const iArea = colIndex(header, ['área', 'area']);
   const iResp = colIndex(header, ['responsável técnico', 'responsavel tecnico', 'responsável', 'responsavel']);
   const iGest = colIndex(header, ['gestor aprovador', 'gestor']);
-  const iCrit = colIndex(header, ['criticidade']);
+  const iCrit = colIndex(header, ['criticidade (processo)', 'criticidade']);
   const iUlt = colIndex(header, ['data da última revisão', 'ultima revisao', 'última revisão']);
+  const iFreq = colIndex(header, ['frequência (meses)', 'frequencia (meses)', 'frequência', 'frequencia']);
   const iProx = colIndex(header, ['próxima revisão', 'proxima revisao']);
   const iSit = colIndex(header, ['situação', 'situacao']);
   const iStat = colIndex(header, ['status']);
@@ -444,34 +487,50 @@ function parseSGQ(wb){
   const docs = [];
   for(let i = hi + 1; i < rows.length; i++){
     const r = rows[i];
-    if(!r || r[iCod] == null || r[iCod] === '') continue;
-    const prox = fmtDateISO(r[iProx]);
-    const ult = fmtDateISO(r[iUlt]);
-    const situacao = iSit >= 0 && r[iSit] != null && String(r[iSit]).trim() !== ''
-      ? String(r[iSit]).trim() : 'Ativo';
-    // Prioridade: valores da planilha (Status e Dias Restantes). Só recalcula se faltar.
+    if(!r || cellVal(r[iCod]) == null) continue;
+    const situacao = (iSit >= 0 && cellVal(r[iSit]) != null)
+      ? String(cellVal(r[iSit])).trim() : 'Ativo';
+
+    // Datas: última revisão costuma ser valor real; próxima/dias/status são FÓRMULAS
+    // → nunca confiar em fórmula; recalcular sempre a partir de última + frequência.
+    const ult = fmtDateISO(cellVal(iUlt >= 0 ? r[iUlt] : null));
+    const freq = (iFreq >= 0 && cellVal(r[iFreq]) != null) ? Number(cellVal(r[iFreq])) : null;
+
+    let prox = null;
+    const proxRaw = iProx >= 0 ? cellVal(r[iProx]) : null;
+    if(proxRaw != null) prox = fmtDateISO(proxRaw);
+    if(!prox && ult && freq != null && !Number.isNaN(freq)){
+      prox = addMonthsISO(ult, freq);
+    }
+
     let dias = null;
-    if(iDias >= 0 && r[iDias] != null && r[iDias] !== ''){
-      const n = Number(r[iDias]);
+    const diasRaw = iDias >= 0 ? cellVal(r[iDias]) : null;
+    if(diasRaw != null){
+      const n = Number(diasRaw);
       if(!Number.isNaN(n)) dias = n;
     }
     if(dias === null) dias = daysUntil(prox);
+
+    // Status: só aceita se for um dos valores conhecidos (nunca fórmula)
+    const STATUS_OK = ['Em dia','Vence em 30 dias','Vence em 90 dias','Vencido','Obsoleto','Cancelado'];
     let status = null;
-    if(iStat >= 0 && r[iStat] != null && String(r[iStat]).trim() !== ''){
-      status = String(r[iStat]).trim();
+    const stRaw = iStat >= 0 ? cellVal(r[iStat]) : null;
+    if(stRaw != null){
+      const s = String(stRaw).trim();
+      if(STATUS_OK.some(x => norm(x) === norm(s))) status = STATUS_OK.find(x => norm(x) === norm(s));
     }
-    // Situação Obsoleto/Cancelado manda no status
     if(/obsoleto/i.test(situacao)) status = 'Obsoleto';
     else if(/cancelado/i.test(situacao)) status = 'Cancelado';
     else if(!status) status = statusFromDays(dias, situacao);
+
     docs.push({
-      codigo: String(r[iCod]),
-      tipo: iTipo >= 0 && r[iTipo] != null ? String(r[iTipo]) : '',
-      titulo: iTit >= 0 && r[iTit] != null ? String(r[iTit]) : '',
-      area: iArea >= 0 && r[iArea] != null ? String(r[iArea]) : '',
-      responsavel: iResp >= 0 && r[iResp] != null ? String(r[iResp]) : '',
-      gestor: iGest >= 0 && r[iGest] != null ? String(r[iGest]) : '',
-      criticidade: iCrit >= 0 && r[iCrit] != null ? String(r[iCrit]) : '',
+      codigo: String(cellVal(r[iCod])),
+      tipo: iTipo >= 0 && cellVal(r[iTipo]) != null ? String(cellVal(r[iTipo])) : '',
+      titulo: iTit >= 0 && cellVal(r[iTit]) != null ? String(cellVal(r[iTit])) : '',
+      area: iArea >= 0 && cellVal(r[iArea]) != null ? String(cellVal(r[iArea])) : '',
+      responsavel: iResp >= 0 && cellVal(r[iResp]) != null ? String(cellVal(r[iResp])) : '',
+      gestor: iGest >= 0 && cellVal(r[iGest]) != null ? String(cellVal(r[iGest])) : '',
+      criticidade: iCrit >= 0 && cellVal(r[iCrit]) != null ? String(cellVal(r[iCrit])) : '',
       ultima_revisao: ult,
       proxima_revisao: prox,
       dias_restantes: dias,
